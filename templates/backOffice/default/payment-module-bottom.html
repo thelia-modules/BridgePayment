@@ -1,0 +1,27 @@
+{default_translation_domain domain="bridgepayment.bo.default"}
+{loop type="order" name="order-list" backend_context="1" status="2,3" id=$order_id}
+{if !empty($TRANSACTION_REF)}
+<div class="panel-body">
+
+        <a href="#refund_order_dialog" class="btn btn-danger btn-responsive" data-toggle="modal" title="{intl l="Refund this order"}">
+            {intl l="Refund"}
+        </a>
+</div>
+
+{capture "refund_order_dialog"}
+    <input type="hidden" name="order_id" value="{$order_id}" />
+{/capture}
+
+{include
+file = "includes/generic-confirm-dialog.html"
+
+dialog_id       = "refund_order_dialog"
+dialog_title    = {intl l="Refund this order"}
+dialog_message  = {intl l="Do you really want to refund this order ?"}
+
+form_action         = {token_url path='/admin/module/bridgepayment/refund'}
+form_content        = {$smarty.capture.refund_order_dialog nofilter}
+}
+
+{/if}
+{/loop}

@@ -1,0 +1,56 @@
+{default_translation_domain domain="bridgepayment.bo.default"}
+<div class="row">
+    <div class="col-md-12 general-block-decorator">
+        <div class="row">
+            <div class="col-md-12 title title-without-tabs">
+                {intl d='bridgepayment.bo.default' l="Bridge Payment Configuration"}
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="row">
+                <div class="col-md-12">
+                    {form name="bridgepayment_form_bridge_payment_configuration"}
+                        <form action="{url path="/admin/module/bridgepayment/configure"}" method="post">
+                            {form_hidden_fields}
+
+                            {include file = "includes/inner-form-toolbar.html"
+                            hide_flags = true
+                            page_url   = "{url path='/admin/module/BridgePayment'}"
+                            close_url  = "{url path='/admin/modules'}"
+                            }
+
+                            {if $form_error}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-danger">{$form_error_message}</div>
+                                    </div>
+                                </div>
+                            {/if}
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="title title-without-tabs">{intl d='bridgepayment.bo.default' l="Access to Bridge Platform"}</p>
+                                    {render_form_field field="client_id"}
+                                    {render_form_field field="client_secret"}
+                                    {render_form_field field="hook_secret"}
+                                    {render_form_field field="bank_id"}
+                                    {render_form_field field="run_mode"}
+                                    {render_form_field field="redirect_mode"}
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="title title-without-tabs">{intl d='bridgepayment.bo.default' l="Payment configuration"}</p>
+                                    {render_form_field field="iban"}
+                                    {render_form_field field="allowed_ip_list"}
+                                    {render_form_field field="minimum_amount"}
+                                    {render_form_field field="maximum_amount"}
+                                </div>
+                            </div>
+                        </form>
+                    {/form}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

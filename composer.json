@@ -1,0 +1,13 @@
+{
+  "name": "thelia/bridge-payment-module",
+  "description": "BridgePayment module for Thelia",
+  "license": "LGPL-3.0-or-later",
+  "type": "thelia-module",
+  "require": {
+    "thelia/installer": "~1.1",
+    "symfony/http-client": "^6.2"
+  },
+  "extra": {
+    "installer-name": "BridgePayment"
+  }
+}
