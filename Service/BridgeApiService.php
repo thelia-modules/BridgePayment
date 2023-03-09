@@ -3,6 +3,7 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\BridgePayment;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Thelia\Log\Tlog;
 use Thelia\Model\ConfigQuery;
@@ -16,9 +17,9 @@ class BridgeApiService
 
     protected $httpClient;
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct()
     {
-        $this->httpClient = $httpClient;
+        $this->httpClient = HttpClient::create();
     }
 
     public function getPaymentLink(Order $order)
@@ -56,10 +57,11 @@ class BridgeApiService
             return ['url' => $content['url']];
         }catch (\Exception $exception) {
             $error = json_decode($response->getContent(false), true);
+            $message = array_key_exists('message', $error) ? $error['message'] : $error[0]['message'];
 
-            Tlog::getInstance()->error('Error Bridge API link creation : ' . $error['message']);
+            Tlog::getInstance()->error('Error Bridge API link creation : ' . $message);
 
-            return ['error' => 'Error Bridge API link creation : ' . $error['message']];
+            return ['error' => 'Error Bridge API link creation : ' . $message];
         }
     }
 
@@ -78,10 +80,11 @@ class BridgeApiService
 
         }catch (\Exception $exception) {
             $error = json_decode($response->getContent(false), true);
+            $message = array_key_exists('message', $error) ? $error['message'] : $error[0]['message'];
 
-            Tlog::getInstance()->error('Error unable to get banks : ' . $error['message']);
+            Tlog::getInstance()->error('Error unable to get banks : ' . $message);
 
-            return ['error' => 'Error unable to get banks : ' . $error['message']];
+            return ['error' => 'Error unable to get banks : ' . $message];
         }
     }
 
@@ -123,10 +126,11 @@ class BridgeApiService
             return ['url' => $content['consent_url']];
         }catch (\Exception $exception) {
             $error = json_decode($response->getContent(false), true);
+            $message = array_key_exists('message', $error) ? $error['message'] : $error[0]['message'];
 
-            Tlog::getInstance()->error('Error Bridge API link creation : ' . $error['message']);
+            Tlog::getInstance()->error('Error Bridge API link creation : ' . $message);
 
-            return ['error' => 'Error Bridge API link creation : ' . $error['message']];
+            return ['error' => 'Error Bridge API link creation : ' . $message];
         }
     }
 
@@ -212,10 +216,11 @@ class BridgeApiService
 
         }catch (\Exception $exception) {
             $error = json_decode($response->getContent(false), true);
+            $message = array_key_exists('message', $error) ? $error['message'] : $error[0]['message'];
 
-            Tlog::getInstance()->error('Error unable to get payment request : ' . $error['message']);
+            Tlog::getInstance()->error('Error unable to get payment request : ' . $message);
 
-            return ['error' => 'Error unable to get payment request : ' . $error['message']];
+            return ['error' => 'Error unable to get payment request : ' . $message];
         }
     }
 

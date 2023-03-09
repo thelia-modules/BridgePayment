@@ -11,9 +11,7 @@
     </loops>
 
     <forms>
-        <!--
-        <form name="MyFormName" class="BridgePayment\Form\MySuperForm" />
-        -->
+        <form name="bridgepayment_form_bridge_payment_configuration" class="BridgePayment\Form\BridgePaymentConfiguration" />
     </forms>
 
     <commands>
@@ -24,18 +22,25 @@
 
 
     <services>
-        <service id="bridgepayment.api.service" alias="BridgePayment\Service\BridgeApiService" public="true">
+
+        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApiService">
+        </service>
+
+        <service id="bridgepayment.bank.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
+            <argument type="service" id="bridgepayment.api.service"/>
+            <tag name="kernel.event_subscriber"/>
         </service>
     </services>
 
 
-    <!--
+
     <hooks>
-        <hook id="bridgepayment.hook" class="BridgePayment\Hook\MySuperHook">
-            <tag name="hook.event_listener" event="main.body.bottom" type="front|back|pdf|email" method="onMainBodyBottom" />
+        <hook id="bridgepayment.hook" class="BridgePayment\Hook\BackHook">
+            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
+            <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
         </hook>
     </hooks>
-    -->
+
 
     <!--
     <exports>

@@ -4,28 +4,27 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <!--
-
-    if a /admin/module/bridgepayment/ route is provided, a "Configuration" button will be displayed
-    for the module in the module list. Clicking this button will invoke this route.
-
-    <route id="my_route_id" path="/admin/module/bridgepayment">
-        <default key="_controller">BridgePayment\Full\Class\Name\Of\YourConfigurationController::methodName</default>
+    <route id="bridgepayment_configure_save" path="/admin/module/bridgepayment/configure" methods="POST">
+        <default key="_controller">BridgePayment\Controller\ConfigurationController::configure</default>
     </route>
 
-    <route id="my_route_id" path="/admin/module/bridgepayment/route-name">
-        <default key="_controller">BridgePayment\Full\Class\Name\Of\YourAdminController::methodName</default>
+    <route id="bridgepayment_create_payment" path="/bridge/create-payment" methods="POST">
+        <default key="_controller">BridgePayment\Controller\PaymentController::createPayment</default>
     </route>
 
-    <route id="my_route_id" path="/my/route/name">
-        <default key="_controller">BridgePayment\Full\Class\Name\Of\YourOtherController::methodName</default>
+    <route id="bridgepayment_refund" path="/admin/module/bridgepayment/refund" methods="POST">
+        <default key="_controller">BridgePayment\Controller\RefundController::refund</default>
     </route>
 
-    ...add as many routes as required.
-
-    <route>
-    ...
+    <route id="bridgepayment_refund_success" path="/admin/module/bridgepayment/refund/success/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\RefundController::refundSuccess</default>
     </route>
-    -->
 
+    <route id="bridgepayment_refund_failed" path="/admin/module/bridgepayment/refund/failed/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\RefundController::refundFailure</default>
+    </route>
+
+    <route id="bridgepayment_notification" path="/bridge/notification" methods="POST">
+        <default key="_controller">BridgePayment\Controller\WebHookController::notification</default>
+    </route>
 </routes>

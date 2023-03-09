@@ -24,12 +24,12 @@ class BridgePaymentConfiguration extends BaseForm
         $event = new BridgeBankEvent();
         $event->setCountry($country);
 
-        $this->dispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
+        $this->dispatcher->dispatch(BridgeBankEvent::GET_BANKS_EVENT, $event);
 
-        $banks = $event->getBanks();
+        $banks = $event->getBanks() ?: [];
         $bankChoices = [];
         foreach ($banks as $bank) {
-            $bankChoices[$bank['name']] = $bank['id'];
+            $bankChoices[$bank['id']] = $bank['name'];
         }
 
         $this->formBuilder
@@ -40,8 +40,8 @@ class BridgePaymentConfiguration extends BaseForm
                     'constraints' => [new NotBlank()],
                     'required' => true,
                     'choices' => [
-                        'TEST' => 'Test',
-                        'PRODUCTION' => 'Production',
+                        'Test' => 'TEST',
+                        'Production' => 'PRODUCTION',
                     ],
                     'label' => Translator::getInstance()->trans('Mode de fonctionnement', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
@@ -183,6 +183,11 @@ class BridgePaymentConfiguration extends BaseForm
                 )
             )
             ;
+    }
+
+    public function getName()
+    {
+        return 'bridgepayment_form_bridge_payment_configuration';
     }
 
 }

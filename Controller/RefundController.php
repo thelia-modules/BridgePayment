@@ -6,7 +6,6 @@ use BridgePayment\Service\BridgeApiService;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Translation\Translator;
@@ -14,18 +13,13 @@ use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Tools\URL;
 
-
-/**
- * @Route("/admin/module/bridgepayment/refund", name="bridgepayment_refund")
- */
 class RefundController extends BaseAdminController
 {
-
-    /**
-     * @Route("", name="", methods="POST")
-     */
-    public function refund(Request $request, BridgeApiService $bridgeApiService)
+    public function refund()
     {
+        /** @var BridgeApiService $bridgeApiService */
+        $bridgeApiService = $this->container->get('bridgepayment.api.service');
+        $request = $this->getRequest();
         $orderId = $request->get('order_id');
 
         try {
@@ -50,11 +44,10 @@ class RefundController extends BaseAdminController
         }
     }
 
-    /**
-     * @Route("/success/{orderId}", name="_success", methods="GET")
-     */
-    public function refundSuccess($orderId, Request $request, EventDispatcherInterface $eventDispatcher)
+    public function refundSuccess($orderId)
     {
+        /** @var EventDispatcherInterface $eventDispatcher */
+        $eventDispatcher = $this->container->get('event_dispatcher');
         $order = OrderQuery::create()->findPk($orderId);
 
         $orderStatus = OrderStatusQuery::create()
@@ -64,7 +57,7 @@ class RefundController extends BaseAdminController
         try {
             $event = new OrderEvent($order);
             $event->setStatus($orderStatus->getId());
-            $eventDispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
+            $eventDispatcher->dispatch(TheliaEvents::ORDER_UPDATE_STATUS, $event);
         }catch (\Exception $exception) {
             return $this->generateRedirect(URL::getInstance()->absoluteUrl("/admin/order/update/$orderId", [
                 'update_status_error_message' => $exception->getMessage()
@@ -74,9 +67,6 @@ class RefundController extends BaseAdminController
         return $this->generateRedirect(URL::getInstance()->absoluteUrl("/admin/order/update/$orderId"));
     }
 
-    /**
-     * @Route("/failed/{orderId}", name="_failed", methods="GET")
-     */
     public function refundFailure($orderId)
     {
         return $this->generateRedirect(URL::getInstance()->absoluteUrl("/admin/order/update/$orderId", [

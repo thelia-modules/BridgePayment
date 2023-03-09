@@ -9,20 +9,6 @@ use Thelia\Model\ModuleQuery;
 
 class BackHook extends BaseHook
 {
-    public static function getSubscribedHooks()
-    {
-        return [
-            'module.configuration' => [
-                'type' => 'back',
-                'method' => 'onModuleConfiguration'
-            ],
-            'order-edit.payment-module-bottom' => [
-                'type' => 'back',
-                'method' => 'onPaymentModuleBottom'
-            ]
-        ];
-    }
-
     public function onModuleConfiguration(HookRenderEvent $event)
     {
         $event->add($this->render("module-configuration.html"));

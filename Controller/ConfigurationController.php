@@ -6,7 +6,6 @@ use BridgePayment\BridgePayment;
 use BridgePayment\Form\BridgePaymentConfiguration;
 use Symfony\Component\HttpFoundation\Request;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
@@ -14,21 +13,15 @@ use Thelia\Form\Exception\FormValidationException;
 use Thelia\Tools\URL;
 
 
-/**
- * @Route("/admin/module/bridgepayment", name="bridgepayment_configure")
- */
 class ConfigurationController extends BaseAdminController
 {
-    /**
-     * @Route("/configure", name="_save", methods="POST")
-     */
     public function configure(Request $request)
     {
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'BridgePayment', AccessManager::UPDATE)) {
             return $response;
         }
 
-        $configurationForm = $this->createForm(BridgePaymentConfiguration::getName());
+        $configurationForm = $this->createForm('bridgepayment_form_bridge_payment_configuration');
 
         try {
             $form = $this->validateForm($configurationForm, "POST");

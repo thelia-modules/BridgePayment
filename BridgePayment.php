@@ -31,7 +31,7 @@ class BridgePayment extends AbstractPaymentModule
      * Have fun !
      */
 
-    public function postActivation(ConnectionInterface $con = null): void
+    public function postActivation(ConnectionInterface $con = null)
     {
 
         $statuses = [
@@ -88,19 +88,6 @@ class BridgePayment extends AbstractPaymentModule
             }
         }
 
-    }
-
-    /**
-     * Defines how services are loaded in your modules
-     *
-     * @param ServicesConfigurator $servicesConfigurator
-     */
-    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
-    {
-        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
-            ->autowire(true)
-            ->autoconfigure(true);
     }
 
     public function pay(Order $order)

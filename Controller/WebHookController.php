@@ -6,7 +6,6 @@ use BridgePayment\BridgePayment;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -14,16 +13,13 @@ use Thelia\Model\Order;
 use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
 
-/**
- * @Route("/bridge/notification", name="bridgepayment_notification")
- */
 class WebHookController extends BaseFrontController
 {
-    /**
-     * @Route("", name="", methods="POST")
-     */
-    public function notification(Request $request, EventDispatcherInterface $dispatcher)
+    public function notification()
     {
+        /** @var EventDispatcherInterface $eventDispatcher */
+        $dispatcher = $this->container->get('event_dispatcher');
+        $request = $this->getRequest();
         $webhookSecret = BridgePayment::getConfigValue('hook_secret');
         if (null !== $webhookSecret) {
             $this->checkSignature($request, $webhookSecret);
@@ -54,12 +50,19 @@ class WebHookController extends BaseFrontController
 
     protected function updateOrderStatus($status, Order $order, EventDispatcherInterface $dispatcher)
     {
-        $orderStatusCode = match ($status) {
-            "ACSC" => "paid",
-            "PDNG" => "payment_pending",
-            "RJCT" => "payment_rejected",
-            default => null,
-        };
+        switch ($status) {
+            case "ACSC":
+                $orderStatusCode = 'paid';
+                break;
+            case "PDNG":
+                $orderStatusCode = 'payment_pending';
+                break;
+            case "RJCT":
+                $orderStatusCode = 'payment_rejected';
+                break;
+            default :
+                $orderStatusCode = null;
+        }
 
         $orderStatus = OrderStatusQuery::create()
             ->filterByCode($orderStatusCode)
@@ -68,7 +71,7 @@ class WebHookController extends BaseFrontController
         if (null !== $orderStatus){
             $event = new OrderEvent($order);
             $event->setStatus($orderStatus->getId());
-            $dispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
+            $dispatcher->dispatch(TheliaEvents::ORDER_UPDATE_STATUS, $event);
         }
     }
 
