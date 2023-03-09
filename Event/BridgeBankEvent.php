@@ -2,9 +2,10 @@
 
 namespace BridgePayment\Event;
 
+use Symfony\Component\EventDispatcher\Event;
 use Thelia\Model\Country;
 
-class BridgeBankEvent
+class BridgeBankEvent extends Event
 {
     const GET_BANKS_EVENT = "brigepayment.event.get_banks";
 

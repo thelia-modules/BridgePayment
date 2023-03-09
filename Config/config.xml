@@ -5,18 +5,52 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
     <loops>
-        <loop name="bank_list" class="BridgePayment\Loop\BankLoop" />
-        <loop name="payment_link_list" class="BridgePayment\Loop\PaymentLinkLoop" />
-        <loop name="payment_transaction_list" class="BridgePayment\Loop\PaymentTransactionLoop" />
+        <!-- sample definition
+        <loop name="MySuperLoop" class="BridgePayment\Loop\MySuperLoop" />
+        -->
     </loops>
+
+    <forms>
+        <form name="bridgepayment_form_bridge_payment_configuration" class="BridgePayment\Form\BridgePaymentConfiguration" />
+    </forms>
+
+    <commands>
+        <!--
+        <command class="BridgePayment\Command\MySuperCommand" />
+        -->
+    </commands>
 
 
     <services>
-        <service id="bridgepayment.payment.link.service" alias="BridgePayment\Service\PaymentLink" public="true">
+
+        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApiService">
         </service>
 
-        <service id="bridgepayment.bank.service" alias="BridgePayment\Service\BankService" public="true">
+        <service id="bridgepayment.bank.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
+            <argument type="service" id="bridgepayment.api.service"/>
+            <tag name="kernel.event_subscriber"/>
         </service>
     </services>
 
+
+
+    <hooks>
+        <hook id="bridgepayment.hook" class="BridgePayment\Hook\BackHook">
+            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
+            <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
+        </hook>
+    </hooks>
+
+
+    <!--
+    <exports>
+
+    </exports>
+    -->
+
+    <!--
+    <imports>
+
+    </imports>
+    -->
 </config>

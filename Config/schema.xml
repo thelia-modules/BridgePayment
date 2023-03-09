@@ -1,56 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database defaultIdMethod="native" name="TheliaMain" namespace="BridgePayment\Model">
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../vendor/thelia/propel/resources/xsd/database.xsd" >
 
-  <table name="bridge_payment_link">
-    <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
-    <column name="uuid" required="true" size="150" type="VARCHAR"/>
-    <column name="link" required="true" size="200" type="VARCHAR" />
-
-    <column name="status" size="50" type="VARCHAR" />
-
-    <column name="order_id" required="true" type="INTEGER"/>
-
-    <column name="amount" scale="6" size="16" type="DECIMAL" />
-
-    <column name="expired_at" type="TIMESTAMP"/>
-
-    <behavior name="timestampable" />
-
-    <index name="idx_bridge_payment_link_uuid">
-      <index-column name="uuid" />
-    </index>
-
-    <foreign-key foreignTable="order" onDelete="CASCADE" onUpdate="RESTRICT">
-      <reference local="order_id" foreign="id"/>
-    </foreign-key>
-  </table>
-
-  <table name="bridge_payment_transaction">
-    <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
-
-    <column name="uuid" required="true" size="150" type="VARCHAR" />
-    <column name="order_id" required="true" type="INTEGER"/>
-
-    <column name="status" size="50" type="VARCHAR" />
-    <column name="status_reason" size="150" type="VARCHAR" />
-
-    <column name="amount" scale="6" size="16" type="DECIMAL" />
-
-    <column name="payment_link_id" size="150" type="VARCHAR" />
-    <column name="payment_request_id" required="true" size="150" type="VARCHAR" />
-
-    <column name="timestamp" required="true" type="TIMESTAMP"/>
-
-    <behavior name="timestampable" />
-
-    <foreign-key foreignTable="order" onDelete="CASCADE" onUpdate="RESTRICT">
-      <reference local="order_id" foreign="id"/>
-    </foreign-key>
-
-    <foreign-key foreignTable="bridge_payment_link" onDelete="CASCADE" onUpdate="RESTRICT">
-      <reference local="payment_link_id" foreign="uuid"/>
-    </foreign-key>
-  </table>
 
   <external-schema filename="local/config/schema.xml" referenceOnly="true" />
 </database>

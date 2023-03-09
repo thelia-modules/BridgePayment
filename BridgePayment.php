@@ -2,22 +2,21 @@
 
 namespace BridgePayment;
 
-use BridgePayment\Exception\BridgePaymentLinkException;
-use BridgePayment\Service\BankService;
+use BridgePayment\Model\BridgepaymentHistory;
+use BridgePayment\Model\BridgepaymentHistoryQuery;
 use BridgePayment\Service\BridgeApiService;
-use BridgePayment\Service\PaymentLink;
-use Exception;
+use PayzenEmbedded\PayzenEmbedded;
 use Propel\Runtime\Connection\ConnectionInterface;
-use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Install\Database;
-use Thelia\Log\Tlog;
 use Thelia\Model\Order;
 use Thelia\Model\OrderStatus;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Module\AbstractPaymentModule;
+use Thelia\Module\BaseModule;
 use Thelia\Tools\URL;
 
 class BridgePayment extends AbstractPaymentModule
@@ -25,19 +24,15 @@ class BridgePayment extends AbstractPaymentModule
     /** @var string */
     const DOMAIN_NAME = 'bridgepayment';
 
-    const BRIDGE_API_VERSION = '2021-06-01';
-    const BRIDGE_API_URL = 'https://api.bridgeapi.io';
-
-    /**
-     * @throws PropelException
+    /*
+     * You may now override BaseModuleInterface methods, such as:
+     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
+     *
+     * Have fun !
      */
-    public function postActivation(ConnectionInterface $con = null): void
-    {
-        if (!$this->getConfigValue('is_initialized', false)) {
-            (new Database($con))->insertSql(null, array(__DIR__ . '/Config/TheliaMain.sql'));
 
-            $this->setConfigValue('is_initialized', true);
-        }
+    public function postActivation(ConnectionInterface $con = null)
+    {
 
         $statuses = [
             [
@@ -67,20 +62,6 @@ class BridgePayment extends AbstractPaymentModule
                         'description' => 'Payment with BridgePayment pending',
                     ]
                 ],
-            ],
-            [
-                'code' => 'payment_created',
-                'color' => '#d4773a',
-                'i18n' => [
-                    'fr_FR' => [
-                        'title' => 'Paiement crée',
-                        'description' => 'Paiement avec BridgePayment est crée',
-                    ],
-                    'en_US' => [
-                        'title' => 'Created payment',
-                        'description' => 'Payment with BridgePayment created',
-                    ]
-                ],
             ]
         ];
 
@@ -89,53 +70,36 @@ class BridgePayment extends AbstractPaymentModule
                 ->filterByCode($status['code'])
                 ->findOne();
 
-            if ($newStatus) {
-                continue;
-            }
+            if (null === $newStatus) {
+                $newStatus = (new OrderStatus())
+                    ->setCode($status['code'])
+                    ->setColor($status['color']);
 
-            $newStatus = (new OrderStatus())
-                ->setCode($status['code'])
-                ->setColor($status['color']);
+                foreach ($status['i18n'] as $locale => $statusI18n) {
+                    $newStatus
+                        ->setLocale($locale)
+                        ->setTitle($statusI18n['title'])
+                        ->setDescription($statusI18n['description']);
+                }
 
-            foreach ($status['i18n'] as $locale => $statusI18n) {
                 $newStatus
-                    ->setLocale($locale)
-                    ->setTitle($statusI18n['title'])
-                    ->setDescription($statusI18n['description']);
+                    ->setPosition($newStatus->getNextPosition())
+                    ->save();
             }
-
-            $newStatus
-                ->setPosition($newStatus->getNextPosition())
-                ->save();
         }
+
     }
 
-    /**
-     * Defines how services are loaded in your modules
-     *
-     * @param ServicesConfigurator $servicesConfigurator
-     */
-    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    public function pay(Order $order)
     {
-        $servicesConfigurator->load(self::getModuleCode() . '\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()) . "/I18n/*"])
-            ->autowire()
-            ->autoconfigure();
-    }
+        /** @var BridgeApiService $apiService */
+        $apiService = $this->container->get('bridgepayment.api.service');
 
-    /**
-     * @param Order $order
-     * @return Response|RedirectResponse
-     */
-    public function pay(Order $order): Response|RedirectResponse
-    {
-        try {
-            if (BridgePayment::getConfigValue('redirect_mode', false)) {
-                /** @var PaymentLink $paymentLinkService */
-                $paymentLinkService = $this->container->get('bridgepayment.payment.link.service');
-
-                return new RedirectResponse($paymentLinkService->createPaymentLink($order));
-            }
+        if (BridgePayment::getConfigValue('redirect_mode', false)) {
+            $link = $apiService->getPaymentLink($order);
+        }else {
+            $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
+            $banks = $apiService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
 
             $parser = $this->getContainer()->get("thelia.parser");
 
@@ -146,37 +110,34 @@ class BridgePayment extends AbstractPaymentModule
 
             $renderedTemplate = $parser->render(
                 "bank-list.html",
-                [
-                    "orderId" => $order->getId()
-                ]
+                array_merge(
+                    [
+                        "order_id" => $order->getId()
+                    ],
+                    $banks
+                )
             );
 
             return new Response($renderedTemplate);
-
-        } catch (BridgePaymentLinkException $bridgePaymentLinkexception) {
-            $errorMessage = $bridgePaymentLinkexception->getFormatedErrorMessage();
-        } catch (Exception $ex) {
-            $errorMessage = $ex->getMessage();
-            Tlog::getInstance()->error($errorMessage);
         }
 
-        return new RedirectResponse(
-            URL::getInstance()->absoluteUrl(
-                sprintf("/order/failed/%d/%s", $order->getId(), 'Error'),
-                [
-                    'error_message' => $errorMessage
-                ]
-            )
-        );
+
+        if (array_key_exists('error', $link)){
+            $orderId = $order->getId();
+            $message = $link['error'];
+            return new RedirectResponse(URL::getInstance()->absoluteUrl("/order/failed/$orderId/$message"));
+        }
+
+        return new RedirectResponse($link['url']);
     }
 
-    public function isValidPayment(): bool
+    public function isValidPayment()
     {
+        $mode = self::getConfigValue('run_mode');
         $valid = true;
-        if ('Test' === self::getConfigValue('run_mode')) {
+        if ($mode === 'TEST') {
             $raw_ips = explode("\n", self::getConfigValue('allowed_ip_list', ''));
-
-            $allowed_client_ips = [];
+            $allowed_client_ips = array();
 
             foreach ($raw_ips as $ip) {
                 $allowed_client_ips[] = trim($ip);
@@ -188,13 +149,14 @@ class BridgePayment extends AbstractPaymentModule
         }
 
         if ($valid) {
+            // Check if total order amount is in the module's limits
             $valid = $this->checkMinMaxAmount('minimum_amount', 'maximum_amount');
         }
 
         return $valid;
     }
 
-    protected function checkMinMaxAmount($min, $max): bool
+    protected function checkMinMaxAmount($min, $max)
     {
         $order_total = $this->getCurrentOrderTotalAmount();
 

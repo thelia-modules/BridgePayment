@@ -1,44 +1,27 @@
 <?php
 
-namespace BridgePayment\Controller\Back;
+namespace BridgePayment\Controller;
 
 use BridgePayment\BridgePayment;
 use BridgePayment\Form\BridgePaymentConfiguration;
-use Exception;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Admin\BaseAdminController;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
 use Thelia\Tools\URL;
 
-/**
- * @Route("/admin/module/BridgePayment", name="bridgepayment_configure")
- */
+
 class ConfigurationController extends BaseAdminController
 {
-    /**
-     * @Route("", name="_view", methods="GET")
-     */
-    public function view()
-    {
-        return $this->render('module-configuration');
-    }
-
-    /**
-     * @Route("/configure", name="_save", methods="POST")
-     */
-    public function configure(Request $request): Response|RedirectResponse
+    public function configure(Request $request)
     {
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'BridgePayment', AccessManager::UPDATE)) {
             return $response;
         }
 
-        $configurationForm = $this->createForm(BridgePaymentConfiguration::getName());
+        $configurationForm = $this->createForm('bridgepayment_form_bridge_payment_configuration');
 
         try {
             $form = $this->validateForm($configurationForm, "POST");
@@ -53,16 +36,27 @@ class ConfigurationController extends BaseAdminController
                 BridgePayment::setConfigValue($name, $value);
             }
 
-            return $this->generateRedirect(URL::getInstance()->absoluteUrl('/admin/module/BridgePayment'));
+            // Redirect to the success URL,
+            if ($request->get('save_mode') === 'stay') {
+                // If we have to stay on the same page, redisplay the configuration page/
+                $route = '/admin/module/BridgePayment';
+            } else {
+                // If we have to close the page, go back to the module back-office page.
+                $route = '/admin/modules';
+            }
 
-        } catch (FormValidationException $ex) {
+            return $this->generateRedirect(URL::getInstance()->absoluteUrl($route));
+        }catch (FormValidationException $ex) {
+            // Form cannot be validated. Create the error message using
+            // the BaseAdminController helper method.
             $error_msg = $this->createStandardFormValidationErrorMessage($ex);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
+            // Any other error
             $error_msg = $ex->getMessage();
         }
 
         $this->setupFormErrorContext(
-            Translator::getInstance()->trans("Configuration", [], BridgePayment::DOMAIN_NAME),
+            Translator::getInstance()->trans("Scalapay configuration", [], BridgePayment::DOMAIN_NAME),
             $error_msg,
             $configurationForm,
             $ex
