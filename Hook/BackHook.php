@@ -5,11 +5,10 @@ namespace BridgePayment\Hook;
 use BridgePayment\BridgePayment;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
-use Thelia\Model\ModuleQuery;
 
 class BackHook extends BaseHook
 {
-    public static function getSubscribedHooks()
+    public static function getSubscribedHooks(): array
     {
         return [
             'module.configuration' => [
@@ -31,7 +30,7 @@ class BackHook extends BaseHook
     public function onPaymentModuleBottom(HookRenderEvent $event)
     {
         $arguments = $event->getArguments();
-        if (BridgePayment::getModuleId() == $arguments['module_id']) {
+        if (BridgePayment::getModuleId() == $arguments['module_id'] ?? null) {
             $event->add($this->render("payment-module-bottom.html"));
         }
     }

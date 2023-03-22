@@ -5,17 +5,10 @@
     <fullnamespace>BridgePayment\BridgePayment</fullnamespace>
     <descriptive locale="en_US">
         <title>Bridge payment</title>
-        <!--
-        <subtitle></subtitle>
-        <description></description>
-        <postscriptum></postscriptum>
-        -->
     </descriptive>
     <descriptive locale="fr_FR">
         <title>Paiment par Bridge</title>
     </descriptive>
-    <!-- <logo></logo> -->
-    <!--<images-folder>images</images-folder>-->
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
@@ -27,15 +20,7 @@
             <email>nbarbey@openstudio.fr</email>
         </author>
     </authors>
-    <type>classic</type>
-    <!--
-    module dependencies
-    <required>
-        <module version="&gt;=0.1">Front</module>
-        <module version="~1.0">HookCart</module>
-        <module version="&gt;0.2">HookSearch</module>
-    </required>
-    -->
+    <type>payment</type>
     <thelia>2.5.0</thelia>
     <stability>other</stability>
     <mandatory>0</mandatory>

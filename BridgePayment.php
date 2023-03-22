@@ -2,21 +2,20 @@
 
 namespace BridgePayment;
 
-use BridgePayment\Model\BridgepaymentHistory;
-use BridgePayment\Model\BridgepaymentHistoryQuery;
 use BridgePayment\Service\BridgeApiService;
-use PayzenEmbedded\PayzenEmbedded;
 use Propel\Runtime\Connection\ConnectionInterface;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Thelia\Core\HttpFoundation\Response;
-use Thelia\Install\Database;
 use Thelia\Model\Order;
 use Thelia\Model\OrderStatus;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Module\AbstractPaymentModule;
-use Thelia\Module\BaseModule;
 use Thelia\Tools\URL;
 
 class BridgePayment extends AbstractPaymentModule
@@ -24,16 +23,11 @@ class BridgePayment extends AbstractPaymentModule
     /** @var string */
     const DOMAIN_NAME = 'bridgepayment';
 
-    /*
-     * You may now override BaseModuleInterface methods, such as:
-     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
-     *
-     * Have fun !
+    /**
+     * @throws PropelException
      */
-
     public function postActivation(ConnectionInterface $con = null): void
     {
-
         $statuses = [
             [
                 'code' => 'payment_rejected',
@@ -99,11 +93,18 @@ class BridgePayment extends AbstractPaymentModule
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
             ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
-            ->autowire(true)
-            ->autoconfigure(true);
+            ->autowire()
+            ->autoconfigure();
     }
 
-    public function pay(Order $order)
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws PropelException
+     */
+    public function pay(Order $order): Response|RedirectResponse
     {
         /** @var BridgeApiService $apiService */
         $apiService = $this->container->get('bridgepayment.api.service');
@@ -134,7 +135,6 @@ class BridgePayment extends AbstractPaymentModule
             return new Response($renderedTemplate);
         }
 
-
         if (array_key_exists('error', $link)){
             $orderId = $order->getId();
             $message = $link['error'];
@@ -144,7 +144,7 @@ class BridgePayment extends AbstractPaymentModule
         return new RedirectResponse($link['url']);
     }
 
-    public function isValidPayment()
+    public function isValidPayment(): bool
     {
         $mode = self::getConfigValue('run_mode');
         $valid = true;
@@ -169,7 +169,7 @@ class BridgePayment extends AbstractPaymentModule
         return $valid;
     }
 
-    protected function checkMinMaxAmount($min, $max)
+    protected function checkMinMaxAmount($min, $max): bool
     {
         $order_total = $this->getCurrentOrderTotalAmount();
 

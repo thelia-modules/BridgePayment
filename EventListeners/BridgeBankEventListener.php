@@ -4,17 +4,28 @@ namespace BridgePayment\EventListeners;
 
 use BridgePayment\Event\BridgeBankEvent;
 use BridgePayment\Service\BridgeApiService;
+use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class BridgeBankEventListener implements EventSubscriberInterface
 {
-    protected $bridgeApiService;
-
-    public function __construct(BridgeApiService $bridgeApiService)
+    public function __construct(
+        protected BridgeApiService $bridgeApiService
+    )
     {
-        $this->bridgeApiService = $bridgeApiService;
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    #[T]
     public function getBanks(BridgeBankEvent $bridgeBankEvent)
     {
         $result = $this->bridgeApiService->getBanks($bridgeBankEvent->getCountry()->getIsoalpha2());
@@ -28,11 +39,11 @@ class BridgeBankEventListener implements EventSubscriberInterface
         }
     }
 
-    public static function getSubscribedEvents()
+    #[ArrayShape([BridgeBankEvent::GET_BANKS_EVENT => "array"])]
+    public static function getSubscribedEvents(): array
     {
         return [
             BridgeBankEvent::GET_BANKS_EVENT => ['getBanks', 128]
         ];
     }
-
 }
