@@ -5,9 +5,14 @@
   "type": "thelia-module",
   "require": {
     "thelia/installer": "~1.1",
-    "symfony/http-client": "^6.2"
+    "guzzlehttp/guzzle": "^7.5"
   },
   "extra": {
     "installer-name": "BridgePayment"
+  },
+  "config": {
+    "allow-plugins": {
+      "thelia/installer": true
+    }
   }
 }

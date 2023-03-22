@@ -1,0 +1,94 @@
+{if $PAYMENT_MODE === 'CREATE'}
+{include file="modal/banklist.html"}
+
+<script type="application/javascript">
+    {$bankList = []}
+
+    {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+        {$bankList[$BANK_NAME]['id'] = $BANK_ID}
+        {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+        {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+        {$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+    {/loop}
+
+    const bridgeBankList = document.getElementById('bridge-bank-list');
+    const bridgeBankListContent = document.getElementById('bridge-bank-list-content');
+    const inputElt = document.getElementById('bank-list');
+    const listBank = JSON.parse(`{$bankList|json_encode nofilter}`);
+    const contentBanksElt = document.getElementById('contentBanks');
+
+    bridgeBankList.style.display = 'none';
+    bridgeBankListContent.style.display = 'none';
+
+    let processBankClick = async function(bankId) {
+        const response = await fetch(`{url path="/bridge/bank/select/"}` + bankId, {
+            method: "GET"
+        })
+    };
+
+    function createBankCard(bank) {
+        const card = document.createElement('div');
+        card.classList.add('col-lg-3');
+        card.classList.add('flex-col');
+        card.dataset.bank = bank.id;
+
+        const figure = document.createElement('figure');
+        const img = document.createElement('img');
+        img.src = bank.logo;
+        const name = document.createElement('div');
+        name.innerHTML = bank.name;
+        name.classList.add('text-center');
+
+        card.append(figure);
+        card.append(name);
+        figure.append(img);
+        contentBanksElt.append(card);
+
+        card.addEventListener('click', function (e) {
+            e.preventDefault();
+            processBankClick(card.dataset.bank);
+            bridgeBankListContent.style.display = 'none';
+        });
+    }
+
+    function format(string) {
+        return string.replace('é', 'e').replace('è', 'e').replace('ê', 'e').replace('ô', 'o').replace('î', 'i').toLowerCase();
+    }
+
+    document.getElementById('Checkout')?.addEventListener("click", (e) => {
+        if (e.target.id === 'option_BridgePayment') {
+
+            e.target.closest('label')?.querySelector('span')?.remove();
+
+            bridgeBankList.style.display = 'block';
+            bridgeBankListContent.style.display = 'block';
+
+            e.target.after(bridgeBankList);
+        }
+    });
+
+    inputElt.addEventListener('input', (event) => {
+        const inputValue = format(event.target.value);
+        let inputValues = inputValue.split(' ');
+
+        if (!inputValue || inputValue.length < 2) {
+            contentBanksElt.innerHTML = "";
+            return;
+        }
+
+        contentBanksElt.innerHTML = "";
+
+        for (let val of Object.values(listBank)) {
+            if (inputValues.length === 2 && format(val.name).includes(inputValues[0]) && format(val.name).includes
+            (inputValues[1])) {
+                createBankCard(val);
+            } else if (inputValues.length >= 3 && format(val.name).includes(inputValues[0]) && format(val.name)
+                .includes(inputValues[1]) && format(val.name).includes(inputValues[2])) {
+                createBankCard(val);
+            } else if (format(val.name).includes(inputValue)) {
+                createBankCard(val);
+            }
+        }
+    })
+</script>
+{/if}

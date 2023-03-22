@@ -1,27 +1,93 @@
-{default_translation_domain domain="bridgepayment.bo.default"}
-{loop type="order" name="order-list" backend_context="1" status="2,3" id=$order_id}
-{if !empty($TRANSACTION_REF)}
-<div class="panel-body">
+{$_d="bridgepayment.bo.default"}
+{loop type="order" name="order-list-bridge" backend_context="1" customer='*' id=$order_id}
 
-        <a href="#refund_order_dialog" class="btn btn-danger btn-responsive" data-toggle="modal" title="{intl l="Refund this order"}">
-            {intl l="Refund"}
-        </a>
-</div>
+{loop type="module" name="payment_module" id=$PAYMENT_MODULE}
+{$PAYMENT_MODULE_CODE=$CODE}
+{/loop}
 
-{capture "refund_order_dialog"}
-    <input type="hidden" name="order_id" value="{$order_id}" />
-{/capture}
+{if $PAYMENT_MODULE_CODE=="BridgePayment"}
+    <div class="panel panel-default" style="margin-top: 10px;">
+        <div class="panel-heading">
+            <h4 style="text-align: center;">{intl l="BridgePayment payment informations"  d='bridgepayment.bo.default'}</h4>
+        </div>
+        <div class="panel panel-body">
+            <div class="row">
+                {ifloop rel="payment_link_list"}
+                    <div class="col-md-12 title title-without-tabs">
+                        {intl l='BridgePayment payment link history' d=$_d}
+                    </div>
+                    <div class="col-md-12">
+                        <table class="table table-condensed table-hover">
+                            <thead>
+                            <tr>
+                                <th>{intl l='ID' d=$_d}</th>
+                                <th>{intl l='Link ID' d=$_d}</th>
+                                <th>{intl l='Link' d=$_d}</th>
+                                <th>{intl l='Amount' d=$_d}</th>
+                                <th>{intl l='Expire at' d=$_d}</th>
+                                <th>{intl l='Updated at' d=$_d}</th>
+                                <th>{intl l='Status' d=$_d}</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {loop type="payment_link_list" name="payment_link_list" order_id=$order_id}
+                                <td>
+                                    {$PAYMENT_LINK_ID}
+                                </td>
+                                <td>
+                                    {$PAYMENT_LINK_UUID}
+                                </td>
+                                <td>
+                                    <a class="btn btn-link" href="{$PAYMENT_LINK_LINK}">{$PAYMENT_LINK_LINK}</a>
+                                </td>
+                                <td>
+                                    {format_money number=$TOTAL_TAXED_AMOUNT currency_id=$CURRENCY}
+                                </td>
+                                <td>
+                                    {$PAYMENT_LINK_EXPIRED_AT}
+                                </td>
+                                <td>
+                                    {$PAYMENT_LINK_UPDATED_AT}
+                                </td>
+                                <td>
+                                    <span class="label"
+                                          style="background-color: {$PAYMENT_LINK_STATUS_COLOR};">{$PAYMENT_LINK_STATUS}</span>
+                                </td>
+                                <td>
+                                    <a class="btn btn-primary"
+                                       href="{url path="/admin/module/BridgePayment/paymentlink/refresh/{$PAYMENT_LINK_UUID}"}">
+                                        <i class="glyphicon glyphicon-refresh"></i>
+                                    </a>
 
-{include
-file = "includes/generic-confirm-dialog.html"
-
-dialog_id       = "refund_order_dialog"
-dialog_title    = {intl l="Refund this order"}
-dialog_message  = {intl l="Do you really want to refund this order ?"}
-
-form_action         = {token_url path='/admin/module/bridgepayment/refund'}
-form_content        = {$smarty.capture.refund_order_dialog nofilter}
-}
-
+                                    {if $PAYMENT_LINK_STATUS !== 'EXPIRED' && $PAYMENT_LINK_STATUS !== 'COMPLETED'}
+                                        <a class="btn btn-danger"
+                                           href="{url path="/admin/module/BridgePayment/paymentlink/revoke/{$PAYMENT_LINK_UUID}"}">
+                                            <i class="glyphicon glyphicon-remove"></i>
+                                        </a>
+                                    {/if}
+                                </td>
+                                {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID}
+                            {/loop}
+                            </tbody>
+                        </table>
+                    </div>
+                {/ifloop}
+                {elseloop rel="payment_link_list"}
+                    {ifloop rel="payment_transaction_list"}
+                        <div class="col-md-12 title title-without-tabs">
+                            {intl l='BridgePayment payment transaction history' d=$_d}
+                        </div>
+                        <div class="col-md-12">
+                            {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID}
+                        </div>
+                    {/ifloop}
+                    {elseloop rel="payment_transaction_list"}
+                        <div class="alert alert-info"> {intl l='No payment information' d=$_d}</div>
+                    {/elseloop}
+                {/elseloop}
+            </div>
+        </div>
+    </div>
 {/if}
 {/loop}

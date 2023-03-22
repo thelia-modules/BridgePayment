@@ -1,0 +1,42 @@
+{strip}
+<div id="bridge-bank-list">
+    <div class="mr-6 block text-base text-main">{intl l="Bridge payment"}</div>
+    <div id="bridge-bank-list-content">
+        <div>
+            <h4>{intl l="To proceed with the payment, it is necessary to select your bank." d="bridgepayment.fo.modern"}</h4>
+        </div>
+        <div>
+
+            {$bankList = []}
+
+            {loop type="bank_list" name="bank_list" limit=10}
+                {$bankList[$BANK_NAME]['id'] = $BANK_ID}
+                {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+                {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+                {$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+            {/loop}
+
+            <form class="PhoneCheck mt-0">
+                <div class="PhoneCheck-field">
+                    <div class="PhoneInput">
+                        <input list="bank-list-datalist"
+                               style="width: 100%; padding: 0.5em;"
+                               class="PhoneInput"
+                               id="bank-list"
+                               name="bank-list">
+                    </div>
+                </div>
+            </form>
+
+            <datalist id="bank-list-datalist">
+                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+                    <option value="{$BANK_NAME}">
+                {/loop}
+            </datalist>
+
+        </div>
+    </div>
+
+    <div class="row" id="contentBanks" aria-autocomplete="none"  style="display:flex; flex-wrap: wrap; margin-top: 20px;"></div>
+</div>
+{/strip}

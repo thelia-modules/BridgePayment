@@ -1,0 +1,14 @@
+#contentBanks {
+    display:flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    max-height: 350px;
+    border: 1px solid #eee;
+    padding-left: 1em;
+}
+
+#bank-list {
+    width: 100%;
+    width: 100%;
+    padding: 0.5em;
+}

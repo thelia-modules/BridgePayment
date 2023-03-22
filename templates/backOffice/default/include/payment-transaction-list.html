@@ -1,0 +1,32 @@
+{ifloop rel="payment_transaction_list" }
+    <table class="table table-condensed table-striped table-bordered">
+        <tr>
+            <th>{intl l='Transaction ID' d=$_d}</th>
+            <th>{intl l='Amount' d=$_d}</th>
+            <th>{intl l='Created at' d=$_d}</th>
+            <th>{intl l='Status' d=$_d}</th>
+            <th>{intl l='Status reason' d=$_d}</th>
+            <th>{intl l='Action' d=$_d}</th>
+        </tr>
+        {loop type="payment_transaction_list" name="payment_transaction_list" order_id=$order_id payment_link_id=$PAYMENT_LINK_UUID}
+            <tr>
+                <td>{$PAYMENT_TRANSACTION_UUID}</td>
+                <td>
+                    {if $PAYMENT_TRANSACTION_AMOUNT}
+                        {format_money number=$PAYMENT_TRANSACTION_AMOUNT currency_id=$CURRENCY}
+                    {else}
+                        {format_money number=$TOTAL_TAXED_AMOUNT currency_id=$CURRENCY}
+                    {/if}
+                </td>
+                <td>{$PAYMENT_TRANSACTION_CREATED_AT}</td>
+                <td>
+                    <span class="label" style="background-color: {$PAYMENT_TRANSACTION_STATUS_COLOR};">{$PAYMENT_TRANSACTION_STATUS}</span>
+                </td>
+                <td>{$PAYMENT_TRANSACTION_STATUS_REASON}</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="{url path='/admin/module/BridgePayment/payment/refresh/'}{$PAYMENT_TRANSACTION_PAYMENT_REQUEST_ID}">{intl l='Refresh' d=$_d}</a>
+                </td>
+            </tr>
+        {/loop}
+    </table>
+{/ifloop}

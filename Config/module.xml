@@ -4,18 +4,11 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_2.xsd">
     <fullnamespace>BridgePayment\BridgePayment</fullnamespace>
     <descriptive locale="en_US">
-        <title>Bridge payment</title>
-        <!--
-        <subtitle></subtitle>
-        <description></description>
-        <postscriptum></postscriptum>
-        -->
+        <title>BridgeApi payment</title>
     </descriptive>
     <descriptive locale="fr_FR">
-        <title>Paiment par Bridge</title>
+        <title>Paiement par BridgeApi</title>
     </descriptive>
-    <!-- <logo></logo> -->
-    <!--<images-folder>images</images-folder>-->
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
@@ -26,17 +19,17 @@
             <name>Nicolas Barbey</name>
             <email>nbarbey@openstudio.fr</email>
         </author>
+        <author>
+            <name>Quiterie Julien</name>
+            <email>qjuliendecapele@openstudio.fr</email>
+        </author>
+        <author>
+            <name>Bertrand TOURLONIAS</name>
+            <email>btourlonias@openstudio.fr</email>
+        </author>
     </authors>
-    <type>classic</type>
-    <!--
-    module dependencies
-    <required>
-        <module version="&gt;=0.1">Front</module>
-        <module version="~1.0">HookCart</module>
-        <module version="&gt;0.2">HookSearch</module>
-    </required>
-    -->
-    <thelia>2.5.0</thelia>
+    <type>payment</type>
+    <thelia>2.4.0</thelia>
     <stability>other</stability>
     <mandatory>0</mandatory>
     <hidden>0</hidden>

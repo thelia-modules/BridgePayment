@@ -25,7 +25,5 @@ composer require thelia/bridge-payment-module:~1.0
 - On your webhook configuration in Callback URL enter `https://<your_domain>/bridge/notification` 
 and check `payment.transaction.created` and `payment.transaction.updated`.
 - Copy your webhook secret key in BridgePayment Thelia module configuration.
-- Finish your configuration on Thelia by selecting a bank and enter your IBAN.
 
 You can check Bridge documentation for help https://docs.bridgeapi.io/docs/quickstart
-

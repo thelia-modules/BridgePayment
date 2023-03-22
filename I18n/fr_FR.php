@@ -1,15 +1,72 @@
 <?php
 
-/*
- * This file is part of the Thelia package.
- * http://www.thelia.net
- *
- * (c) OpenStudio <info@thelia.net>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-return [
-    // 'an english string' => 'La traduction française de la chaine',
-];
+return array(
+    'Allowed IPs in test mode' => 'IP autorisées en mode sandbox',
+    'Bank not selected' => 'Banque non sélectionnée',
+    'Banks not found.' => 'Aucun banque disponible.',
+    'Bridge payment error.' => 'Bridge erreur de paiement',
+    'Can\'t refresh link.' => 'Impossible de rafraîchir le lien',
+    'Can\'t revoke link.' => 'Impossible de révoquer ce lien.',
+    'In Bridge payment creation mode, the bank selection will be displayed on the invoice page instead of order pay redirection.' => 'En mode de création de paiement, la sélection de la banque s’affichera dans le tunnel de commande au lieu de procéder à une redirection.',
+    'List of IP addresses allowed to use this payment on the front-office when in sandbox mode (your current IP is %ip). One address per line' => 'Liste des ip autorisées pour utiliser Bridge en front-office en mode sandbox (votre IP is %ip). Une adresse par ligne.',
+    'Maximum order total' => 'Maximum total commande',
+    'Maximum order total in the default currency for which this payment method is available. Enter 0 for no maximum' => 'Maximum total commande dans la devise par défaut. Saisir 0 pour ignorer ce minimum.',
+    'Minimum order total' => 'Minimum total commande',
+    'Minimum order total in the default currency for which this payment method is available. Enter 0 for no minimum' => 'Minimum total commande dans la devise par défaut. Saisir 0 pour ignorer ce minimum.',
+    'No banks not found.' => 'Aucun banque disponible.',
+    'Payment process error !' => 'Paiement non abouti !',
+    'Production Client Id' => 'Client Id de production',
+    'Production Client secret' => 'Client secret de production',
+    'Production Hook Secret' => 'Hook secret de production',
+    'Received failed order id' => 'Mauvais ID de commande reçu',
+    'Received failed order id does not belong to the current customer' => 'Mauvais ID de commande reçu',
+    'Run mode' => 'Mode de fonctionnement',
+    'Sandbox' => 'Sandbox',
+    'Sandbox Client Id' => 'Client Id en sandbox',
+    'Sandbox Client secret' => 'Client Secret en sandbox',
+    'Sandbox Hook Secret' => 'Client Id en sandbox',
+    'The production Client Id. This is the "Client Id" in your Bridge Back App.' => 'Le "Client Id" production de votre app Bridge.',
+    'The production Client secret. This is the "Client secret" in your Bridge Back App.' => 'Le "Client Secret" production de votre app Bridge à générer.',
+    'The production Hook Secret. This is the "Hook Secret" in your Bridge Back App webhook parameters.' => 'Secret pour sécuriser votre webhook de production.',
+    'The sandbox Client Id. This is the "Client Id" in your Bridge Back App.' => 'Le "Client Id" sandbox de votre app Bridge.',
+    'The sandbox Client Secret. This is the "Client Secret" in your Bridge Back App.' => 'Le "Client Secret" sandbox de votre app Bridge.',
+    'The sandbox Hook Secret. This is the "Hook Secret" in your Bridge Back App webhook parameters.' => 'Secret pour sécuriser votre webhook en sandbox.',
+    'Use Bridge payment creation' => 'Utiliser la création de paiement Bridge',
+    'Use Bridge payment link' => 'Utiliser paiement par link Bridge',
+    'Use payment link method.' => 'Utiliser un paiement par lien',
+    'We\'re sorry, a problem occurred and your payment was not successful.' => 'Nous sommes désolés, il y a eu un problème sur votre paiement.',
+    'We\'re sorry, revoked or expired payment link.' => 'Nous sommes désolés, lien de paiement révoqué ou expiré.',
+    'Bank not found.' => 'Aucune banque trouvée.',
+    'Company name' => 'Raison sociale',
+    'Firstname' => 'Nom',
+    'CREA' => 'Paiement créé',
+    'ACTC' => 'Paiement créé',
+    'PDNG' => 'En Attente',
+    'ACSC' => 'Payé',
+    'RJCT' => 'Annulé',
+    'VALID' => 'Valide',
+    'EXPIRED' => 'Expiré',
+    'REVOKED' => 'Révoqué',
+    'COMPLETED' => 'Complété',
+    'AC01' => '(IncorrectAccountNumber): the account number is either invalid or does not exist',
+    'AC04' => '(ClosedAccountNumber): the account is closed and cannot be used',
+    'AC06' => '(BlockedAccount): the account is blocked and cannot be used',
+    'AG01' => '(Transaction forbidden): Transaction forbidden on this type of account',
+    'AM18' => '(InvalidNumberOfTransactions): the number of transactions exceeds the ASPSP acceptance limit',
+    'CH03' => '(RequestedExecutionDateOrRequestedCollectionDateTooFarInFuture): The requested execution date is too far in the future',
+    'CUST' => '(RequestedByCustomer): The reject is due to the debtor: refusal or lack of liquidity',
+    'DS02' => '(OrderCancelled): An authorized user has cancelled the order',
+    'FF01' => '(InvalidFileFormat): The reject is due to the original Payment Request which is invalid (syntax, structure or values)',
+    'FRAD' => '(FraudulentOriginated): the Payment Request is considered as fraudulent',
+    'MS03' => '(NotSpecifiedReasonAgentGenerated): No reason specified by the ASPSP (usually the bank)',
+    'NOAS' => '(NoAnswerFromCustomer): The PSU (the user) has neither accepted nor rejected the Payment Request and a timeout has occurred',
+    'RR01' => '(MissingDebtorAccountOrIdentification): The Debtor account and/or Identification are missing or inconsistent',
+    'RR03' => '(MissingCreditorNameOrAddress): Specification of the creditor’s name and/or address needed for regulatory requirements is insufficient or missing',
+    'RR04' => '(RegulatoryReason): Reject from regulatory reason',
+    'RR12' => '(InvalidPartyID): Invalid or missing identification required within a particular country or payment type',
+    'Lastname' => 'Prénom',
+    'List of IP addresses allowed to use this payment on the front-office when in test mode (your current IP is %ip). One address per line' => 'Liste des IPs autorisées pour paiement en front-office en test-mode (your current IP is %ip). Une IP par ligne.',
+    'Payment request closed.' => 'Requête de paiement en clôturée. ',
+    'Payment request error.' => 'Requête de paiement en échec.',
+    'Store bank' => 'Banque du store',
+);

@@ -1,0 +1,159 @@
+{extends file="admin-layout.tpl"}
+
+{block name="after-bootstrap-css"}
+    <style>
+        .block {
+            padding: 20px;
+            border-bottom: 0.5px solid #00afd7;
+        }
+
+        .block h2 {
+            color: #00afd7;
+        }
+
+        .block .block {
+            border: 2px solid rgba(0, 211, 152, 0.61);
+        }
+    </style>
+{/block}
+
+{block name="no-return-functions"}
+    {$admin_current_location = 'module'}
+{/block}
+
+{block name="page-title"}{intl l='BridgePayment module configuration' d=$_d}{/block}
+
+{block name="check-resource"}admin.module{/block}
+{block name="check-access"}view{/block}
+{block name="check-module"}BridgePayment{/block}
+
+{block name="main-content"}
+    {$_d="bridgepayment.bo.default"}
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            {form name="bridgepayment_form_bridge_payment_configuration"}
+            <form action="{url path="/admin/module/BridgePayment/configure"}" method="POST">
+                {form_hidden_fields form=$form}
+
+                {form_field form=$form field='error_url'}
+                    <input type="hidden" name="{$name}" value="{url path={navigate to="current"}}"/>
+                {/form_field}
+
+                {form_field form=$form field='success_url'}
+                    <input type="hidden" name="{$name}" value="{url path={navigate to="current"}}"/>
+                {/form_field}
+
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="block col-md-12" style="background-color: #00afd7;">
+                            <img style="height: 34px;" src="{image file='BridgePayment/assets/bridge-logo.png' source="BridgePayment"}" class="img-responsive"/>
+                        </div>
+                        {if $form_error}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">{$form_error_message}</div>
+                            </div>
+                        </div>
+                        {/if}
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="BridgePayment mode" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-12">
+                                {render_form_field form=$form field="payment_mode"}
+                            </div>
+                        </div>
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="Mode" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group ">
+                                    {form_field form=$form field="run_mode"}
+                                    <label for="run_mode" class="control-label">
+                                        {intl l="Run environment mode" d=$_d}  <span class="required">*</span>
+                                    </label>
+                                    <select id="run_mode" name="{$name}" class="form-control" aria-required="true" required>
+                                        <option value=""></option>
+                                        {foreach $choices as $choice}
+                                            <option value="{$choice->value}" {if $choice->value == $value}selected="selected"{/if}>{$choice->label}</option>
+                                        {/foreach}
+                                    </select>
+                                    {/form_field}
+                                    <span class="help-block">{intl l='Sandbox or production mode.' d=$_d}</span>
+                                </div>
+                            </div>
+                            <div id="ip_list" class="col-md-6">
+                                {render_form_field field="allowed_ip_list"}
+                            </div>
+                        </div>
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="PRODUCTION - API configuration" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="prod_client_id"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="prod_client_secret"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="prod_hook_secret"}
+                            </div>
+                        </div>
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="SANDBOX - API configuration" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="client_id"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="client_secret"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="hook_secret"}
+                            </div>
+                        </div>
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="Webhook configuration" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="url_callback">{intl l="Notification callback URL" d=$_d}</label>
+                                    <input id="url_callback" type="text" class="form-control" readonly value="{url path="/bridge/notification"}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block col-md-12">
+                            <div class="col-md-12">
+                                <h2>{intl l="Payment configurations" d=$_d}</h2>
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="minimum_amount"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="maximum_amount"}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <input type="submit" class="btn btn-success form-control" value="{intl l="Save" d=$_d}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/form}
+            </form>
+        </div>
+    </div>
+{/block}
+
+{block name="javascript-last-call"}
+
+    <scrip>
+
+    </scrip>
+
+{/block}
