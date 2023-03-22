@@ -183,9 +183,13 @@ class BridgePaymentConfiguration extends BaseForm
     protected function getBanks(): array
     {
         $event = (new BridgeBankEvent())
-            ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country')));
+            ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country', 64)));
 
         $this->dispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
+
+        if($event->getError()){
+            return [];
+        }
 
         $bankChoices = [];
 
