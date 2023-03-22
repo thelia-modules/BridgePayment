@@ -25,12 +25,9 @@ class BridgeBankEventListener implements EventSubscriberInterface
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
+    #[T]
     public function getBanks(BridgeBankEvent $bridgeBankEvent)
     {
-        if (!$bridgeBankEvent->getCountry()) {
-            return;
-        }
-
         $result = $this->bridgeApiService->getBanks($bridgeBankEvent->getCountry()->getIsoalpha2());
 
         if (array_key_exists('error', $result)) {

@@ -2,22 +2,25 @@
 
 namespace BridgePayment\Controller;
 
-
 use BridgePayment\Service\BridgeApiService;
+use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Model\OrderQuery;
+use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Tools\URL;
 
-
+/**
+ * @Route("/bridge/create-payment", name="bridgepayment_create_payment")
+ */
 class PaymentController extends BaseFrontController
 {
-    public function createPayment()
+    /**
+     * @Route("", name="", methods="POST")
+     */
+    public function createPayment(Request $request, BridgeApiService $bridgeApiService): RedirectResponse
     {
-        /** @var BridgeApiService $bridgeApiService */
-        $bridgeApiService = $this->container->get('bridgepayment.api.service');
-        $request = $this->getRequest();
         $orderId = $request->get('order_id');
         $bankId = $request->get('bank');
 
@@ -33,5 +36,4 @@ class PaymentController extends BaseFrontController
 
         return new RedirectResponse($response['url']);
     }
-
 }
