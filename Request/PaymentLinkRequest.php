@@ -47,7 +47,7 @@ class PaymentLinkRequest implements JsonSerializable
             ]
         ];
 
-        $this->callbackUrl = URL::getInstance()->absoluteUrl("/order/placed/" . $order->getId());
+        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/order/cancel/" . $order->getId());
         $this->clientReference = $order->getCustomer()->getRef();
 
         return $this;
