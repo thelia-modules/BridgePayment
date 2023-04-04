@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
     <services>
-        <service id="bridgepayment.api.service" alias="BridgePayment\Service\BridgeApiService" public="true">
+        <service id="bridgepayment.payment.link.service" alias="BridgePayment\Service\PaymentLink" public="true">
         </service>
     </services>
 

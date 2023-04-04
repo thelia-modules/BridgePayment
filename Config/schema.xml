@@ -1,8 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database defaultIdMethod="native" name="TheliaMain"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="../../../vendor/thelia/propel/resources/xsd/database.xsd" >
+<database defaultIdMethod="native" name="TheliaMain" namespace="BridgePayment\Model">
 
+  <table name="bridge_payment_link">
+    <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />
+    <column name="uuid" required="true" size="150" type="VARCHAR"/>
+    <column name="link" required="true" size="200" type="VARCHAR" />
+
+    <column name="status" size="50" type="VARCHAR" />
+
+    <column name="customer_id" required="true" type="INTEGER"/>
+    <column name="order_id" required="true" type="INTEGER"/>
+
+    <column name="expired_at" type="DATE"/>
+    <column name="created_at" type="DATE"/>
+    <column name="updated_at" type="DATE"/>
+
+    <index name="idx_bridge_payment_link_uuid">
+      <index-column name="uuid" />
+    </index>
+
+    <foreign-key foreignTable="customer" onDelete="CASCADE" onUpdate="RESTRICT">
+      <reference local="customer_id" foreign="id"/>
+    </foreign-key>
+
+    <foreign-key foreignTable="order" onDelete="CASCADE" onUpdate="RESTRICT">
+      <reference local="order_id" foreign="id"/>
+    </foreign-key>
+  </table>
+
+  <table name="bridge_payment_request">
+    <column name="uuid" size="150" type="VARCHAR" primaryKey="true" />
+    <column name="status" required="true" size="50" type="VARCHAR" />
+    <column name="payment_link_uuid" required="true" size="150" type="VARCHAR" />
+    <column name="created_at" type="DATE"/>
+    <column name="updated_at" type="DATE"/>
+
+    <foreign-key foreignTable="bridge_payment_link" onDelete="CASCADE" onUpdate="RESTRICT">
+      <reference local="payment_link_uuid" foreign="uuid"/>
+    </foreign-key>
+
+    <index name="idx_bridge_payment_request_uuid">
+      <index-column name="uuid" />
+    </index>
+  </table>
 
   <external-schema filename="local/config/schema.xml" referenceOnly="true" />
 </database>

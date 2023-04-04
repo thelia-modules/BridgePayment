@@ -2,16 +2,17 @@
 
 namespace BridgePayment;
 
+use BridgePayment\Exception\BridgePaymentLinkException;
 use BridgePayment\Service\BridgeApiService;
+use BridgePayment\Service\PaymentLink;
+use Exception;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Thelia\Core\HttpFoundation\Response;
+use Thelia\Install\Database;
+use Thelia\Log\Tlog;
 use Thelia\Model\Order;
 use Thelia\Model\OrderStatus;
 use Thelia\Model\OrderStatusQuery;
@@ -23,11 +24,20 @@ class BridgePayment extends AbstractPaymentModule
     /** @var string */
     const DOMAIN_NAME = 'bridgepayment';
 
+    const BRIDGE_API_VERSION = '2021-06-01';
+    const BRIDGE_API_URL = 'https://api.bridgeapi.io';
+
     /**
      * @throws PropelException
      */
     public function postActivation(ConnectionInterface $con = null): void
     {
+        if (!$this->getConfigValue('is_initialized', false)) {
+            (new Database($con))->insertSql(null, array(__DIR__ . '/Config/TheliaMain.sql'));
+
+            $this->setConfigValue('is_initialized', true);
+        }
+
         $statuses = [
             [
                 'code' => 'payment_rejected',
@@ -81,7 +91,6 @@ class BridgePayment extends AbstractPaymentModule
                     ->save();
             }
         }
-
     }
 
     /**
@@ -91,66 +100,76 @@ class BridgePayment extends AbstractPaymentModule
      */
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
-        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+        $servicesConfigurator->load(self::getModuleCode() . '\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()) . "/I18n/*"])
             ->autowire()
             ->autoconfigure();
     }
 
     /**
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws PropelException
+     * @param Order $order
+     * @return Response|RedirectResponse
      */
     public function pay(Order $order): Response|RedirectResponse
     {
+        try {
+            if (BridgePayment::getConfigValue('redirect_mode', false)) {
+                /** @var PaymentLink $paymentLinkService */
+                $paymentLinkService = $this->container->get('bridgepayment.payment.link.service');
+
+                return new RedirectResponse($paymentLinkService->createPaymentLink($order));
+            }
+
+        } catch (BridgePaymentLinkException $bridgePaymentLinkexception) {
+            $errorMessage = $bridgePaymentLinkexception->getFormatedErrorMessage();
+        } catch (Exception $ex) {
+            $errorMessage = $ex->getMessage();
+            Tlog::getInstance()->error($errorMessage);
+        }
+
+        return new RedirectResponse(
+            URL::getInstance()->absoluteUrl(
+                sprintf("/order/failed/%d/%s", $order->getId(), 'Error'),
+                [
+                    'error_message' => $errorMessage
+                ]
+            )
+        );
+
         /** @var BridgeApiService $apiService */
+        /*
         $apiService = $this->container->get('bridgepayment.api.service');
 
-        if (BridgePayment::getConfigValue('redirect_mode', false)) {
-            $link = $apiService->getPaymentLink($order);
-        }else {
-            $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
-            $banks = $apiService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
+        $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
+        $banks = $apiService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
 
-            $parser = $this->getContainer()->get("thelia.parser");
+        $parser = $this->getContainer()->get("thelia.parser");
 
-            $parser->setTemplateDefinition(
-                $parser->getTemplateHelper()->getActiveFrontTemplate(),
-                true
-            );
+        $parser->setTemplateDefinition(
+            $parser->getTemplateHelper()->getActiveFrontTemplate(),
+            true
+        );
 
-            $renderedTemplate = $parser->render(
-                "bank-list.html",
-                array_merge(
-                    [
-                        "order_id" => $order->getId()
-                    ],
-                    $banks
-                )
-            );
+        $renderedTemplate = $parser->render(
+            "bank-list.html",
+            array_merge(
+                [
+                    "order_id" => $order->getId()
+                ],
+                $banks
+            )
+        );
 
-            return new Response($renderedTemplate);
-        }
-
-        if (array_key_exists('error', $link)){
-            $orderId = $order->getId();
-            $message = $link['error'];
-            return new RedirectResponse(URL::getInstance()->absoluteUrl("/order/failed/$orderId/$message"));
-        }
-
-        return new RedirectResponse($link['url']);
+        return new Response($renderedTemplate);*/
     }
 
     public function isValidPayment(): bool
     {
-        $mode = self::getConfigValue('run_mode');
         $valid = true;
-        if ($mode === 'TEST') {
+        if ('TEST' === self::getConfigValue('run_mode')) {
             $raw_ips = explode("\n", self::getConfigValue('allowed_ip_list', ''));
-            $allowed_client_ips = array();
+
+            $allowed_client_ips = [];
 
             foreach ($raw_ips as $ip) {
                 $allowed_client_ips[] = trim($ip);
@@ -162,7 +181,6 @@ class BridgePayment extends AbstractPaymentModule
         }
 
         if ($valid) {
-            // Check if total order amount is in the module's limits
             $valid = $this->checkMinMaxAmount('minimum_amount', 'maximum_amount');
         }
 
