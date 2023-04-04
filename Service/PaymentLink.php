@@ -2,6 +2,8 @@
 
 namespace BridgePayment\Service;
 
+use BridgePayment\Model\Notification\Notification;
+use BridgePayment\Model\Notification\NotificationContent;
 use Exception;
 use BridgePayment\Exception\BridgePaymentLinkException;
 use BridgePayment\Model\BridgePaymentLink;
@@ -68,7 +70,6 @@ class PaymentLink
             ->setUuid($paymentLinkResponse->id)
             ->setStatus('VALID')
             ->setLink($paymentLinkResponse->url)
-            ->setCustomerId($order->getCustomerId())
             ->setOrderId($order->getId())
             ->save();
 
@@ -78,21 +79,21 @@ class PaymentLink
     /**
      * @throws PropelException
      */
-    public function handlePaymentLinkUpdate($requestContent): void
+    public function paymentLinkUpdate(NotificationContent $notification): void
     {
-        $customerRef = $requestContent['payment_link_client_reference'];
-
         $paymentLink = BridgePaymentLinkQuery::create()
-            ->useCustomerQuery()
-                ->filterByRef($customerRef)
+            ->useOrderQuery()
+                ->useCustomerQuery()
+                    ->filterByRef($notification->clientReference)
+                ->endUse()
             ->endUse()
-            ->filterByUuid($requestContent['payment_link_id'])
+            ->filterByUuid($notification->paymentLinkId)
             ->findOne();
 
         if (!$paymentLink) {
-            throw new Exception(sprintf('Payment link not found on this customer : %s', $customerRef));
+            throw new Exception(sprintf('Payment link not found on this customer : %s', $notification->clientReference));
         }
 
-        $paymentLink->setStatus($requestContent['payment_link_status'])->save();
+        $paymentLink->setStatus($notification->status)->save();
     }
 }

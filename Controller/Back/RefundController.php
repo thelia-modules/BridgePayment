@@ -1,14 +1,14 @@
 <?php
 
-namespace BridgePayment\Controller;
+namespace BridgePayment\Controller\Back;
 
 use BridgePayment\Service\BridgeApiService;
 use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Thelia\Controller\Admin\BaseAdminController;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;

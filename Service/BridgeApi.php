@@ -9,16 +9,18 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class BridgeApi
 {
-    public function __construct(
-        protected HttpClientInterface $httpClient
-    )
+    public function __construct(protected HttpClientInterface $httpClient)
     {
     }
 
     /**
      * @throws TransportExceptionInterface
      */
-    public function apiCall($method, $request, $data): ResponseInterface
+    public function apiCall(
+        string $method,
+        string $request,
+        $data
+    ): ResponseInterface
     {
         $clientId = BridgePayment::getConfigValue('client_id');
         $clientSecret = BridgePayment::getConfigValue('client_secret');

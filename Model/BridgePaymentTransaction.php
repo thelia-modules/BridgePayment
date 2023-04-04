@@ -2,10 +2,10 @@
 
 namespace BridgePayment\Model;
 
-use BridgePayment\Model\Base\BridgePaymentRequest as BaseBridgePaymentRequest;
+use BridgePayment\Model\Base\BridgePaymentTransaction as BaseBridgePaymentTransaction;
 
 /**
- * Skeleton subclass for representing a row from the 'bridge_payment_request' table.
+ * Skeleton subclass for representing a row from the 'bridge_payment_transaction' table.
  *
  *
  *
@@ -13,7 +13,7 @@ use BridgePayment\Model\Base\BridgePaymentRequest as BaseBridgePaymentRequest;
  * application requirements.  This class will only be generated as
  * long as it does not already exist in the output directory.
  */
-class BridgePaymentRequest extends BaseBridgePaymentRequest
+class BridgePaymentTransaction extends BaseBridgePaymentTransaction
 {
 
 }
