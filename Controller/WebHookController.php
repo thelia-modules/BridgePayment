@@ -27,6 +27,7 @@ class WebHookController extends BaseFrontController
     public function notification(Request $request, EventDispatcherInterface $dispatcher): Response
     {
         $webhookSecret = BridgePayment::getConfigValue('hook_secret');
+
         if (null !== $webhookSecret) {
             $this->checkSignature($request, $webhookSecret);
         }
@@ -38,7 +39,9 @@ class WebHookController extends BaseFrontController
         $paymentRequestId = array_key_exists('payment_request_id', $content) ? $content['payment_request_id'] : null;
         $status = array_key_exists('status', $content) ? $content['status'] : null;
 
-        $order = OrderQuery::create()->filterByRef($orderRef)->findOne();
+        $order = OrderQuery::create()
+            ->filterById($orderRef)
+        ->findOne();
 
         if (null !== $order) {
             $order->setTransactionRef($paymentRequestId)->save();

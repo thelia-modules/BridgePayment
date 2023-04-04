@@ -3,6 +3,7 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Request\PaymentLinkRequest;
 use Exception;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
