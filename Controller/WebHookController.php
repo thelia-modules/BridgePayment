@@ -3,6 +3,7 @@
 namespace BridgePayment\Controller;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Service\PaymentLink;
 use Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,6 +12,7 @@ use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
+use Thelia\Log\Tlog;
 use Thelia\Model\Order;
 use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
@@ -24,15 +26,34 @@ class WebHookController extends BaseFrontController
      * @Route("", name="", methods="POST")
      * @throws Exception
      */
-    public function notification(Request $request, EventDispatcherInterface $dispatcher): Response
+    public function notification(
+        Request                  $request,
+        EventDispatcherInterface $dispatcher,
+        PaymentLink              $paymentLinkService
+    ): Response
     {
-        $webhookSecret = BridgePayment::getConfigValue('hook_secret');
+        try {
+            $webhookSecret = BridgePayment::getConfigValue('hook_secret');
 
-        if (null !== $webhookSecret) {
-            $this->checkSignature($request, $webhookSecret);
+            if (null !== $webhookSecret) {
+                $this->checkSignature($request, $webhookSecret);
+            }
+
+            switch ($request->get('type')) {
+                case "payment.link.updated":
+                    $paymentLinkService->handlePaymentLinkUpdate($request->get('content'));
+                    break;
+                default:
+                    break;
+            }
+
+        } catch (Exception $ex) {
+            Tlog::getInstance()->addError($ex->getMessage());
+            return new Response('KO', 400);
         }
 
-        $requestContent = json_decode($request->getContent(), true);
+
+        /*$requestContent = json_decode($request->getContent(), true);
 
         $content = $requestContent['content'];
         $orderRef = array_key_exists('end_to_end_id', $content) ? $content['end_to_end_id'] : null;
@@ -54,7 +75,7 @@ class WebHookController extends BaseFrontController
         $response = new Response(json_encode(['message' => 'success']), 200);
         $response->headers->set('Content-Type', 'application/json');
 
-        return $response;
+        return $response;*/
     }
 
     protected function updateOrderStatus($status, Order $order, EventDispatcherInterface $dispatcher)
