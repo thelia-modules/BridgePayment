@@ -15,14 +15,20 @@ CREATE TABLE `bridge_payment_link`
     `uuid` VARCHAR(150) NOT NULL,
     `link` VARCHAR(200) NOT NULL,
     `status` VARCHAR(50),
+    `customer_id` INTEGER NOT NULL,
     `order_id` INTEGER NOT NULL,
-    `amount` DECIMAL(16,6),
-    `expired_at` DATETIME,
-    `created_at` DATETIME,
-    `updated_at` DATETIME,
+    `expired_at` DATE,
+    `created_at` DATE,
+    `updated_at` DATE,
     PRIMARY KEY (`id`),
     INDEX `idx_bridge_payment_link_uuid` (`uuid`),
+    INDEX `bridge_payment_link_fi_7e8f3e` (`customer_id`),
     INDEX `bridge_payment_link_fi_75704f` (`order_id`),
+    CONSTRAINT `bridge_payment_link_fk_7e8f3e`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `customer` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
     CONSTRAINT `bridge_payment_link_fk_75704f`
         FOREIGN KEY (`order_id`)
         REFERENCES `order` (`id`)
@@ -31,34 +37,23 @@ CREATE TABLE `bridge_payment_link`
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- bridge_payment_transaction
+-- bridge_payment_request
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `bridge_payment_transaction`;
+DROP TABLE IF EXISTS `bridge_payment_request`;
 
-CREATE TABLE `bridge_payment_transaction`
+CREATE TABLE `bridge_payment_request`
 (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(150) NOT NULL,
-    `order_id` INTEGER NOT NULL,
-    `status` VARCHAR(50),
-    `status_reason` VARCHAR(150),
-    `amount` DECIMAL(16,6),
-    `payment_link_id` VARCHAR(150),
-    `payment_request_id` VARCHAR(150) NOT NULL,
-    `timestamp` DATETIME NOT NULL,
-    `created_at` DATETIME,
-    `updated_at` DATETIME,
-    PRIMARY KEY (`id`),
-    INDEX `bridge_payment_transaction_fi_75704f` (`order_id`),
-    INDEX `bridge_payment_transaction_fi_a08ebd` (`payment_link_id`),
-    CONSTRAINT `bridge_payment_transaction_fk_75704f`
-        FOREIGN KEY (`order_id`)
-        REFERENCES `order` (`id`)
-        ON UPDATE RESTRICT
-        ON DELETE CASCADE,
-    CONSTRAINT `bridge_payment_transaction_fk_a08ebd`
-        FOREIGN KEY (`payment_link_id`)
+    `status` VARCHAR(50) NOT NULL,
+    `payment_link_uuid` VARCHAR(150) NOT NULL,
+    `created_at` DATE,
+    `updated_at` DATE,
+    PRIMARY KEY (`uuid`),
+    INDEX `idx_bridge_payment_request_uuid` (`uuid`),
+    INDEX `bridge_payment_request_fi_e31f7c` (`payment_link_uuid`),
+    CONSTRAINT `bridge_payment_request_fk_e31f7c`
+        FOREIGN KEY (`payment_link_uuid`)
         REFERENCES `bridge_payment_link` (`uuid`)
         ON UPDATE RESTRICT
         ON DELETE CASCADE

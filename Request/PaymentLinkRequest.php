@@ -3,11 +3,13 @@
 namespace BridgePayment\Request;
 
 use JsonSerializable;
+use BridgePayment\BridgePayment;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Thelia\Model\ConfigQuery;
 use Thelia\Model\Order;
 use Thelia\Tools\URL;
 
@@ -38,11 +40,14 @@ class PaymentLinkRequest implements JsonSerializable
                 'currency' => $order->getCurrency()->getCode(),
                 'amount' => round($order->getTotalAmount(), 2),
                 'end_to_end_id' => $order->getRef(),
-
+                'beneficiary' => [
+                    "iban" => rtrim(BridgePayment::getConfigValue('iban')),
+                    "company_name" => ConfigQuery::read('store_name')
+                ]
             ]
         ];
 
-        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
+        $this->callbackUrl = URL::getInstance()->absoluteUrl("/order/placed/" . $order->getId());
         $this->clientReference = $order->getCustomer()->getRef();
 
         return $this;
