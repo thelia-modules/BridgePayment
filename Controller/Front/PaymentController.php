@@ -1,14 +1,13 @@
 <?php
 
-namespace BridgePayment\Controller;
+namespace BridgePayment\Controller\Front;
 
 use BridgePayment\Service\BridgeApiService;
-use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Model\OrderQuery;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Tools\URL;
 
 /**

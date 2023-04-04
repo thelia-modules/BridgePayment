@@ -1,14 +1,14 @@
 <?php
 
-namespace BridgePayment\Controller;
+namespace BridgePayment\Controller\Back;
 
-use Exception;
 use BridgePayment\BridgePayment;
 use BridgePayment\Form\BridgePaymentConfiguration;
+use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Thelia\Controller\Admin\BaseAdminController;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;

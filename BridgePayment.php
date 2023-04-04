@@ -66,6 +66,20 @@ class BridgePayment extends AbstractPaymentModule
                         'description' => 'Payment with BridgePayment pending',
                     ]
                 ],
+            ],
+            [
+                'code' => 'payment_created',
+                'color' => '#d4773a',
+                'i18n' => [
+                    'fr_FR' => [
+                        'title' => 'Paiement crée',
+                        'description' => 'Paiement avec BridgePayment est crée',
+                    ],
+                    'en_US' => [
+                        'title' => 'Created payment',
+                        'description' => 'Payment with BridgePayment created',
+                    ]
+                ],
             ]
         ];
 
@@ -74,22 +88,24 @@ class BridgePayment extends AbstractPaymentModule
                 ->filterByCode($status['code'])
                 ->findOne();
 
-            if (null === $newStatus) {
-                $newStatus = (new OrderStatus())
-                    ->setCode($status['code'])
-                    ->setColor($status['color']);
-
-                foreach ($status['i18n'] as $locale => $statusI18n) {
-                    $newStatus
-                        ->setLocale($locale)
-                        ->setTitle($statusI18n['title'])
-                        ->setDescription($statusI18n['description']);
-                }
-
-                $newStatus
-                    ->setPosition($newStatus->getNextPosition())
-                    ->save();
+            if ($newStatus) {
+                continue;
             }
+
+            $newStatus = (new OrderStatus())
+                ->setCode($status['code'])
+                ->setColor($status['color']);
+
+            foreach ($status['i18n'] as $locale => $statusI18n) {
+                $newStatus
+                    ->setLocale($locale)
+                    ->setTitle($statusI18n['title'])
+                    ->setDescription($statusI18n['description']);
+            }
+
+            $newStatus
+                ->setPosition($newStatus->getNextPosition())
+                ->save();
         }
     }
 
