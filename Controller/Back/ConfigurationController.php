@@ -17,10 +17,18 @@ use Thelia\Form\Exception\FormValidationException;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/admin/module/bridgepayment", name="bridgepayment_configure")
+ * @Route("/admin/module/BridgePayment", name="bridgepayment_configure")
  */
 class ConfigurationController extends BaseAdminController
 {
+    /**
+     * @Route("", name="_view", methods="GET")
+     */
+    public function view()
+    {
+        return $this->render('module-configuration');
+    }
+
     /**
      * @Route("/configure", name="_save", methods="POST")
      */
@@ -45,13 +53,7 @@ class ConfigurationController extends BaseAdminController
                 BridgePayment::setConfigValue($name, $value);
             }
 
-            $route = '/admin/modules';
-
-            if ($request->get('save_mode') === 'stay') {
-                $route = '/admin/module/BridgePayment';
-            }
-
-            return $this->generateRedirect(URL::getInstance()->absoluteUrl($route));
+            return $this->generateRedirect(URL::getInstance()->absoluteUrl('/admin/module/BridgePayment'));
 
         } catch (FormValidationException $ex) {
             $error_msg = $this->createStandardFormValidationErrorMessage($ex);
@@ -60,7 +62,7 @@ class ConfigurationController extends BaseAdminController
         }
 
         $this->setupFormErrorContext(
-            Translator::getInstance()->trans("Scalapay configuration", [], BridgePayment::DOMAIN_NAME),
+            Translator::getInstance()->trans("Configuration", [], BridgePayment::DOMAIN_NAME),
             $error_msg,
             $configurationForm,
             $ex

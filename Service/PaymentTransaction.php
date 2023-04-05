@@ -55,18 +55,24 @@ class PaymentTransaction
             throw new Exception('Order not found.');
         }
 
-        (new BridgePaymentTransaction())
-            ->setStatus($notification->status)
+        $bridgePaymentTransaction = new BridgePaymentTransaction();
+
+        $status = $notification->status ?? 'CREA';
+
+        $bridgePaymentTransaction->setStatus($status)
             ->setUuid($notification->paymentTransactionId)
             ->setStatusReason($notification->statusReason)
             ->setOrderId($order->getId())
             ->setPaymentLinkId($notification->paymentLinkId)
-            ->setPaymentRequestId($notification->paymentRequestId)
-            ->save();
+            ->setPaymentRequestId($notification->paymentRequestId);
 
-        if ($notification->status) {
-            $this->updateOrderStatus($notification->status, $order);
+        if ($notification->paymentLinkId) {
+            $bridgePaymentTransaction->setPaymentLinkId($notification->paymentLinkId);
         }
+
+        $bridgePaymentTransaction->save();
+
+        $this->updateOrderStatus($notification->status, $order);
     }
 
     protected function updateOrderStatus(string $status, Order $order): void
@@ -81,7 +87,7 @@ class PaymentTransaction
 
         $orderStatus = OrderStatusQuery::create()
             ->filterByCode($orderStatusCode)
-        ->findOne();
+            ->findOne();
 
         if (null !== $orderStatus) {
             $this->dispatcher->dispatch(

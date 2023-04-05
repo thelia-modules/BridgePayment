@@ -81,7 +81,6 @@ class BridgePaymentConfiguration extends BaseForm
                 'hook_secret',
                 TextType::class,
                 [
-                    'required' => false,
                     'label' => Translator::getInstance()->trans('Hook Secret', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'hook_secret'
@@ -90,15 +89,25 @@ class BridgePaymentConfiguration extends BaseForm
                 ]
             )
             ->add(
-                'iban',
+                'beneficiary_iban',
                 TextType::class,
                 [
-                    'required' => false,
                     'label' => Translator::getInstance()->trans('IBAN', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
-                        'for' => 'iban'
+                        'for' => 'beneficiary_iban'
                     ],
-                    'data' => BridgePayment::getConfigValue('iban', ''),
+                    'data' => BridgePayment::getConfigValue('beneficiary_iban', ''),
+                ]
+            )
+            ->add(
+                'beneficiary_name',
+                TextType::class,
+                [
+                    'label' => Translator::getInstance()->trans('Company name', [], BridgePayment::DOMAIN_NAME),
+                    'label_attr' => [
+                        'for' => 'beneficiary_name'
+                    ],
+                    'data' => BridgePayment::getConfigValue('beneficiary_name', ''),
                 ]
             )
             ->add(
@@ -106,7 +115,7 @@ class BridgePaymentConfiguration extends BaseForm
                 CheckboxType::class,
                 [
                     'required' => false,
-                    'label' => Translator::getInstance()->trans('Redirect payment to Bridge', [], BridgePayment::DOMAIN_NAME),
+                    'label' => Translator::getInstance()->trans('Use payment link method.', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'redirect_mode'
                     ],
