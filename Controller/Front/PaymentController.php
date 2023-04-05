@@ -2,11 +2,13 @@
 
 namespace BridgePayment\Controller\Front;
 
-use BridgePayment\Service\BridgeApiService;
+use BridgePayment\BridgePayment;
+use BridgePayment\Service\BridgePaymentInitiation;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\OrderQuery;
 use Thelia\Tools\URL;
 
@@ -18,21 +20,46 @@ class PaymentController extends BaseFrontController
     /**
      * @Route("", name="", methods="POST")
      */
-    public function createPayment(Request $request, BridgeApiService $bridgeApiService): RedirectResponse
+    public function createPayment(
+        Request                 $request,
+        BridgePaymentInitiation $bridgePaymentInitiationService
+    ): RedirectResponse
     {
-        $orderId = $request->get('order_id');
-        $bankId = $request->get('bank');
+        try {
+            $orderId = $request->get('order_id');
+            $bankId = $request->get('bank_id');
 
-        $order = OrderQuery::create()->findPk($orderId);
+            if (!$orderId || !$bankId) {
+                throw new \Exception(
+                    Translator::getInstance()->trans('Payment request error.',
+                        [],
+                        BridgePayment::DOMAIN_NAME)
+                );
+            }
 
-        $response = $bridgeApiService->createPaymentRequest($order, $bankId);
+            $order = OrderQuery::create()->findPk($orderId);
 
-        if (array_key_exists('error', $response)){
-            $orderId = $order->getId();
-            $message = $response['error'];
+            if (!$order) {
+                throw new \Exception(
+                    Translator::getInstance()->trans('Payment request error.',
+                        [],
+                        BridgePayment::DOMAIN_NAME)
+                );
+            }
+
+            if ($order->getBridgePaymentTransactions()->getData() ?? null) {
+                throw new \Exception(
+                    Translator::getInstance()->trans('Payment request closed.',
+                        [],
+                        BridgePayment::DOMAIN_NAME)
+                );
+            }
+
+            return new RedirectResponse($bridgePaymentInitiationService->createPaymentRequest($order, $bankId));
+
+        } catch (\Exception $ex) {
+            $message = $ex->getMessage();
             return new RedirectResponse(URL::getInstance()->absoluteUrl("/order/failed/$orderId/$message"));
         }
-
-        return new RedirectResponse($response['url']);
     }
 }

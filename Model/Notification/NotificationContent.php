@@ -5,7 +5,7 @@ namespace BridgePayment\Model\Notification;
 class NotificationContent
 {
     public string $paymentTransactionId;
-    public string $paymentLinkId;
+    public ?string $paymentLinkId = null;
     public string $paymentRequestId;
     public string $endToEndId;
     public string $clientReference;

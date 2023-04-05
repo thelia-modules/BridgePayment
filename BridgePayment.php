@@ -3,6 +3,7 @@
 namespace BridgePayment;
 
 use BridgePayment\Exception\BridgePaymentLinkException;
+use BridgePayment\Service\BankService;
 use BridgePayment\Service\BridgeApiService;
 use BridgePayment\Service\PaymentLink;
 use Exception;
@@ -136,6 +137,22 @@ class BridgePayment extends AbstractPaymentModule
                 return new RedirectResponse($paymentLinkService->createPaymentLink($order));
             }
 
+            $parser = $this->getContainer()->get("thelia.parser");
+
+            $parser->setTemplateDefinition(
+                $parser->getTemplateHelper()->getActiveFrontTemplate(),
+                true
+            );
+
+            $renderedTemplate = $parser->render(
+                "bank-list.html",
+                [
+                    "orderId" => $order->getId()
+                ]
+            );
+
+            return new Response($renderedTemplate);
+
         } catch (BridgePaymentLinkException $bridgePaymentLinkexception) {
             $errorMessage = $bridgePaymentLinkexception->getFormatedErrorMessage();
         } catch (Exception $ex) {
@@ -151,32 +168,6 @@ class BridgePayment extends AbstractPaymentModule
                 ]
             )
         );
-
-        /** @var BridgeApiService $apiService */
-        /*
-        $apiService = $this->container->get('bridgepayment.api.service');
-
-        $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
-        $banks = $apiService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
-
-        $parser = $this->getContainer()->get("thelia.parser");
-
-        $parser->setTemplateDefinition(
-            $parser->getTemplateHelper()->getActiveFrontTemplate(),
-            true
-        );
-
-        $renderedTemplate = $parser->render(
-            "bank-list.html",
-            array_merge(
-                [
-                    "order_id" => $order->getId()
-                ],
-                $banks
-            )
-        );
-
-        return new Response($renderedTemplate);*/
     }
 
     public function isValidPayment(): bool

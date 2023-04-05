@@ -17,37 +17,111 @@
 {/block}
 
 {block name="main-content"}
+    {$bank_page=1}
+    {$current_page = $bank_page}
     {default_translation_domain domain="bridgepayment.fo.default"}
+    <div class="main">
 
-<div class="main">
-    <article class="col-main clearfix" role="main" aria-labelledby="main-label">
+        <article class="container mx-auto my-12" role="main" aria-labelledby="main-label">
 
-        <h1 id="main-label" class="page-header">{intl l="Secure payment"}</h1>
-        {loop type="order" name="placed-order" id=$order_id}
-        <div id="payment-success" class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">{intl l="You choose to pay by"} : <span class="payment-method label label-primary">{loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}</span></h3>
-            </div>
+            {loop type="order" name="placed-order" id=$orderId}
+                <h1 class="Title Title--2">
+                    {intl l="You choose payment by "} : <span class="payment-method label label-primary">
+                        {loop name="payment-module" type="module" code="BridgePayment"}{$TITLE}{/loop}
+                    </span>
+                </h1>
+                <div>
+                    <div class="mt-2 mb-8 text-xl">{intl l="Thank you for the trust you place in us."}</div>
+                    <div class="mb-4">
+                        <p>{intl l="Your order will be confirmed by us upon receipt of your payment."}</p>
+                    </div>
+                    <div class="inline-block w-full max-w-md p-4 bg-gray-200 rounded-md">
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Order number"} :</div>
+                            <div class="font-bold sm:w-7/12">{$REF}</div>
+                        </div>
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Date"} :</div>
+                            <div class="font-bold sm:w-7/12">{format_date date=$CREATE_DATE output="date"}</div>
+                        </div>
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Total"} :</div>
+                            <div class="font-bold sm:w-7/12">{format_money number={$TOTAL_TAXED_AMOUNT} currency_id=$CURRENCY}</div>
+                        </div>
+                    </div>
 
-            <div class="panel-body">
-                <div class="form-container">
-                    <form action="{url path="/bridge/create-payment"}" method="post">
-                        <input type="hidden" name="order_id" value="{$order_id}">
-                        <label for="bank-select">{intl l="Choose a bank"}</label>
-                        <select name="bank" id="bank-select" class="form-control">
-                            {foreach $banks as $bank}
-                                <option value="{$bank['id']}" >
-                                    {$bank['name']}
-                                </option>
-                            {/foreach}
-                        </select>
-                        <input type="submit" class="btn btn-success" value="{intl l="Confirm"}">
+                    <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">
+                        <fieldset class="my-8">
+                            <input type="hidden" name="order_id" value="{$orderId}">
+                            <input type="hidden" id="bank_id" name="bank_id" value="">
+                        </fieldset>
+                        <div class="mt-4 text-center">
+                            <input type="submit" class="inline-block mt-8 Button" value="{intl l="Confirm"}">
+                        </div>
                     </form>
-                </div>
-            </div>
-        </div>
-        {/loop}
-    </article>
-</div>
 
+                    <div id="GridProductWrapper" class="mb-10 md:mb-20 GridProductWrapper">
+                        <div id="GridProduct" class="ProductList">
+                            {loop type="bank_list" name="bank_list" search="demo" order_id=$orderId}
+                                <a href="#" class="SingleProduct bank" data-id="{$BANK_ID}">
+                                    <figure class="SingleProduct-img">
+                                        <picture class="ResponsiveImage {$class|default:''} w-full">
+                                            <img src="{$BANK_LOGO}" class="w-full">
+                                        </picture>
+                                    </figure>
+                                    <div class="SingleProduct-desc">
+                                        <div class="SingleProduct-title">{$BANK_NAME}</div>
+                                    </div>
+                                </a>
+                            {/loop}
+                        </div>
+
+                        {set_previous_url ignore_current="1"}
+
+                        {$url = {navigate to="current"}}
+
+                        {function name=page_link page=1}{{url path=$url page=$page}|regex_replace:"/\?page=1$|page=1$|page=1&|&page=1$/":'' nofilter}{/function}
+
+                        <nav class="Pagination">
+                            {if $current_page gt 1}
+                                <a class="Pagination-link Pagination-prev" href="{page_link page={$current_page-1} }"
+                                   title="{intl l="Previous"}">
+                                    <span class="">{renderIconSvg icon="arrow" class=""}</span>
+                                </a>
+                            {/if}
+                            {pageloop rel="bank_list"}
+                                <a class="Pagination-link {if $PAGE == $CURRENT}current{/if}"
+                                   href="{page_link page=$PAGE}"> {$PAGE} </a>
+                            {if ($PAGE eq $LAST) || (($PAGE eq $END) && ($END < $LAST))}
+                                {if $CURRENT neq $LAST}
+                                    <a class="Pagination-link Pagination-next" href="{page_link page=$NEXT }"
+                                       title="{intl l="Next"}">
+                                        <span class="">{renderIconSvg icon="arrow" class=""}</span>
+                                    </a>
+                                {/if}
+                            {/if}
+                            {/pageloop}
+                        </nav>
+                    </div>
+
+                    {hook name="order-placed.additional-payment-info" module="$PAYMENT_MODULE" placed_order_id=$placed_order_id}
+                </div>
+            {/loop}
+        </article>
+    </div>
+{/block}
+
+{block name="javascript-initialization"}
+    {strip}
+        <script type="text/javascript">
+            document.querySelectorAll(".bank").forEach(bank =>
+                bank.addEventListener("click", function (ev) {
+                    ev.preventDefault();
+                    const inputBankId = document.getElementById('bank_id');
+                    const form = document.getElementById('payment_request_form');
+                    inputBankId.value = this.dataset.id;
+                    form.submit();
+                }))
+        </script>
+    {/strip}
 {/block}

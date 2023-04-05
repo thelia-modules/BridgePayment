@@ -24,9 +24,9 @@ CREATE TABLE `bridge_payment_link`
     INDEX `bridge_payment_link_fi_75704f` (`order_id`),
     CONSTRAINT `bridge_payment_link_fk_75704f`
         FOREIGN KEY (`order_id`)
-            REFERENCES `order` (`id`)
-            ON UPDATE RESTRICT
-            ON DELETE CASCADE
+        REFERENCES `order` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -42,25 +42,23 @@ CREATE TABLE `bridge_payment_transaction`
     `order_id` INTEGER NOT NULL,
     `status` VARCHAR(50),
     `status_reason` VARCHAR(150),
-    `payment_link_id` VARCHAR(150) NOT NULL,
+    `payment_link_id` VARCHAR(150),
     `payment_request_id` VARCHAR(150) NOT NULL,
     `created_at` DATETIME,
     `updated_at` DATETIME,
     PRIMARY KEY (`id`),
-    INDEX `idx_bridge_payment_transaction_uuid` (`uuid`),
-    INDEX `idx_bridge_payment_transaction_payment_request_id` (`payment_request_id`),
     INDEX `bridge_payment_transaction_fi_75704f` (`order_id`),
     INDEX `bridge_payment_transaction_fi_a08ebd` (`payment_link_id`),
     CONSTRAINT `bridge_payment_transaction_fk_75704f`
         FOREIGN KEY (`order_id`)
-            REFERENCES `order` (`id`)
-            ON UPDATE RESTRICT
-            ON DELETE CASCADE,
+        REFERENCES `order` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
     CONSTRAINT `bridge_payment_transaction_fk_a08ebd`
         FOREIGN KEY (`payment_link_id`)
-            REFERENCES `bridge_payment_link` (`uuid`)
-            ON UPDATE RESTRICT
-            ON DELETE CASCADE
+        REFERENCES `bridge_payment_link` (`uuid`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 # This restores the fkey checks, after having unset them earlier
