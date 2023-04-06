@@ -17,6 +17,7 @@
 
 
 {block name="main-content"}
+    {default_translation_domain domain="bridgepayment.fo.default"}
     <div class="main">
         <article class="container mx-auto my-24" role="main" aria-labelledby="main-label">
             <div class="max-w-5xl mx-auto">
@@ -24,7 +25,16 @@
                 {hook name="order-failed.top"}
 
                 <div id="payment-failure">
-                    {include file="components/smarty/Alert/Alert.html" type="warning" message=$smarty.get.error_message|default:null title={intl l="Order canceled."}}
+                    {$title={intl l="We're sorry, a problem occured and your payment was not successful."}}
+                    {$message=$smarty.get.error_message|default:{intl l="Order canceled."}}
+
+                    <div class="Alert {if $type|default:"default"}Alert--warning{/if} {$class|default:''}" role="alert">
+                        {renderIconSvg icon="info" class="w-6 h-6 mb-4 text-current xs:mb-0 Alert_icon"}
+                        <div class="xs:ml-4">
+                            {if $title|default:null}<p class="mb-2 font-bold">{$title}</p>{/if}
+                            {if $message|default:null}<p class="text-sm">{$message nofilter}</p>{/if}
+                        </div>
+                    </div>
                 </div>
 
                 {hook name="order-failed.bottom"}

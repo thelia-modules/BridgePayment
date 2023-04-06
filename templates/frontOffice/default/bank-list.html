@@ -21,92 +21,62 @@
     {$current_page = $bank_page}
     {default_translation_domain domain="bridgepayment.fo.default"}
     <div class="main">
+        <article class="col-main clearfix" role="main" aria-labelledby="main-label">
 
-        <article class="container mx-auto my-12" role="main" aria-labelledby="main-label">
+            <h1 id="main-label" class="page-header">{intl l="Your Cart"}</h1>
 
-            {loop type="order" name="placed-order" id=$orderId}
-                <h1 class="Title Title--2">
-                    {intl l="You choose payment by "} : <span class="payment-method label label-primary">
-                        {loop name="payment-module" type="module" code="BridgePayment"}{$TITLE}{/loop}
-                    </span>
-                </h1>
-                <div>
-                    <div class="mt-2 mb-8 text-xl">{intl l="Thank you for the trust you place in us."}</div>
-                    <div class="mb-4">
-                        <p>{intl l="Your order will be confirmed by us upon receipt of your payment."}</p>
+            {include file="misc/checkout-progress.tpl" step="last"}
+
+            <div id="payment-failure" class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        {loop type="order" name="bridge-payment-order" id=$order_id}
+                        {intl l="You choose to pay by"} :
+                            <span class="payment-method label label-primary">{loop name="payment-module" type="module" code="BridgePayment"}{$TITLE}{/loop}</span>
+                        {/loop}
+                        {elseloop rel="bridge-payment-order"}
+                        {intl l="Your order payment"}
+                        {/elseloop}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-12 control-input">
+                            <h4>{intl l="Thank you for the trust you place in us."}</h4>
+                            <div class="mb-4">
+                                <p>{intl l="Select your bank to process."}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 control-input">
+                            <input type="text" class="form-control" placeholder="{intl l='Search banks'}"
+                                   id="search_bank" name="search_bank" value="">
+                        </div>
                     </div>
-                    <div class="inline-block w-full max-w-md p-4 bg-gray-200 rounded-md">
-                        <div class="flex flex-wrap mb-2">
-                            <div class="pr-2 sm:w-5/12">{intl l="Order number"} :</div>
-                            <div class="font-bold sm:w-7/12">{$REF}</div>
-                        </div>
-                        <div class="flex flex-wrap mb-2">
-                            <div class="pr-2 sm:w-5/12">{intl l="Date"} :</div>
-                            <div class="font-bold sm:w-7/12">{format_date date=$CREATE_DATE output="date"}</div>
-                        </div>
-                        <div class="flex flex-wrap mb-2">
-                            <div class="pr-2 sm:w-5/12">{intl l="Total"} :</div>
-                            <div class="font-bold sm:w-7/12">{format_money number={$TOTAL_TAXED_AMOUNT} currency_id=$CURRENCY}</div>
-                        </div>
+                    <div class="row" id="contentBanks" style="margin-top: 20px;">
+                        {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
+                            <div class="col-lg-3">
+                                <a href="#" class="bank" data-id="{$BANK_ID}">
+                                    <figure>
+                                        <img src="{$BANK_LOGO}">
+                                    </figure>
+                                    <div>
+                                        <div class="text-center">{$BANK_NAME}</div>
+                                    </div>
+                                </a>
+                            </div>
+                        {/loop}
                     </div>
-
                     <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">
                         <fieldset class="my-8">
                             <input type="hidden" name="order_id" value="{$orderId}">
                             <input type="hidden" id="bank_id" name="bank_id" value="">
                         </fieldset>
-                        <div class="mt-4 text-center">
-                            <input type="submit" class="inline-block mt-8 Button" value="{intl l="Confirm"}">
-                        </div>
                     </form>
-
-                    <div id="GridProductWrapper" class="mb-10 md:mb-20 GridProductWrapper">
-                        <div id="GridProduct" class="ProductList">
-                            {loop type="bank_list" name="bank_list" search="demo" order_id=$orderId}
-                                <a href="#" class="SingleProduct bank" data-id="{$BANK_ID}">
-                                    <figure class="SingleProduct-img">
-                                        <picture class="ResponsiveImage {$class|default:''} w-full">
-                                            <img src="{$BANK_LOGO}" class="w-full">
-                                        </picture>
-                                    </figure>
-                                    <div class="SingleProduct-desc">
-                                        <div class="SingleProduct-title">{$BANK_NAME}</div>
-                                    </div>
-                                </a>
-                            {/loop}
-                        </div>
-
-                        {set_previous_url ignore_current="1"}
-
-                        {$url = {navigate to="current"}}
-
-                        {function name=page_link page=1}{{url path=$url page=$page}|regex_replace:"/\?page=1$|page=1$|page=1&|&page=1$/":'' nofilter}{/function}
-
-                        <nav class="Pagination">
-                            {if $current_page gt 1}
-                                <a class="Pagination-link Pagination-prev" href="{page_link page={$current_page-1} }"
-                                   title="{intl l="Previous"}">
-                                    <span class="">{renderIconSvg icon="arrow" class=""}</span>
-                                </a>
-                            {/if}
-                            {pageloop rel="bank_list"}
-                                <a class="Pagination-link {if $PAGE == $CURRENT}current{/if}"
-                                   href="{page_link page=$PAGE}"> {$PAGE} </a>
-                            {if ($PAGE eq $LAST) || (($PAGE eq $END) && ($END < $LAST))}
-                                {if $CURRENT neq $LAST}
-                                    <a class="Pagination-link Pagination-next" href="{page_link page=$NEXT }"
-                                       title="{intl l="Next"}">
-                                        <span class="">{renderIconSvg icon="arrow" class=""}</span>
-                                    </a>
-                                {/if}
-                            {/if}
-                            {/pageloop}
-                        </nav>
-                    </div>
-
-                    {hook name="order-placed.additional-payment-info" module="$PAYMENT_MODULE" placed_order_id=$placed_order_id}
                 </div>
-            {/loop}
+            </div>
+
+            <a href="{url path="/order/invoice"}" role="button" class="btn btn-primary">{intl l="Cancel"}</a>
+            <a href="{navigate to="index"}" role="button" class="btn btn-default">{intl l="Go home"}</a>
         </article>
     </div>
 {/block}
@@ -121,7 +91,39 @@
                     const form = document.getElementById('payment_request_form');
                     inputBankId.value = this.dataset.id;
                     form.submit();
-                }))
+                }));
+
+            document.getElementById('payment_request_form').addEventListener("click", function (ev) {
+                ev.preventDefault();
+                const inputBankId = document.getElementById('bank_id');
+                const form = document.getElementById('payment_request_form');
+                inputBankId.value = this.dataset.id;
+                form.submit();
+            });
+
+            const inputSearch = document.getElementById("search_bank");
+            const contentBanks = document.getElementById("contentBanks");
+
+            inputSearch.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+
+                    var searchWord = this.value;
+
+                    !async function () {
+                        contentBanks.innerHTML = await fetch("/bridge/bank/search/{$orderId}?search="+searchWord, {
+                            method: "GET"
+                        })
+                            .then((response) => response.text())
+                            .then((result) => {
+                                return result;
+                            })
+                            .catch((error) => {
+                                console.log(error)
+                            });
+                    }();
+                }
+            });
         </script>
     {/strip}
 {/block}

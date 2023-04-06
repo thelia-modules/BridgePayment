@@ -1,0 +1,107 @@
+{extends file="layout.tpl"}
+
+{* Security *}
+{block name="no-return-functions" prepend}
+    {check_auth role="CUSTOMER" login_tpl="login"}
+{/block}
+
+{* Body Class *}
+{block name="body-class"}page-order-payment{/block}
+
+{* Breadcrumb *}
+{block name='no-return-functions' append}
+    {$breadcrumbs = [
+    ['title' => {intl l="Cart"}, 'url'=>{url path="/cart"}],
+    ['title' => {intl l="Secure Payment"}, 'url'=>{url path="/order/pay"}]
+    ]}
+{/block}
+
+{block name="main-content"}
+    {$bank_page=1}
+    {$current_page = $bank_page}
+    {default_translation_domain domain="bridgepayment.fo.default"}
+    <div class="main">
+        <article class="container mx-auto my-12" role="main" aria-labelledby="main-label">
+
+            {loop type="order" name="placed-order" id=$orderId}
+                <h1 class="Title Title--2">
+                    {intl l="You choose payment by "} : <span class="payment-method label label-primary">
+                        {loop name="payment-module" type="module" code="BridgePayment"}{$TITLE}{/loop}
+                    </span>
+                </h1>
+                <div class="mt-2 mb-8 text-xl">{intl l="Thank you for the trust you place in us."}</div>
+                <div class="mb-4">
+                    <p>{intl l="Select your bank to process."}</p>
+                </div>
+                <div>
+                    <div style="width: 100%;" class="p-4 bg-gray-200 rounded-md">
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Order number"} :</div>
+                            <div class="font-bold sm:w-7/12">{$REF}</div>
+                        </div>
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Date"} :</div>
+                            <div class="font-bold sm:w-7/12">{format_date date=$CREATE_DATE output="date"}</div>
+                        </div>
+                        <div class="flex flex-wrap mb-2">
+                            <div class="pr-2 sm:w-5/12">{intl l="Total"} :</div>
+                            <div class="font-bold sm:w-7/12">{format_money number={$TOTAL_TAXED_AMOUNT} currency_id=$CURRENCY}</div>
+                        </div>
+                    </div>
+                    <div style="width: 100%;" class="p-1">
+                        <div id="GridProductWrapper" class="mb-3 md:mb-3 GridProductWrapper">
+                            <label for="search_bank" class="Input mb-2">
+                                <input type="text" class="Input-field text-primary" placeholder="{intl l='Search banks'}" id="search_bank" name="search_bank" value="">
+                            </label>
+                            <div id="GridProduct" class="ProductList">
+                                {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
+                                    <a href="#" class="SingleProduct bank" data-id="{$BANK_ID}">
+                                        <figure class="SingleProduct-img">
+                                            <picture class="ResponsiveImage {$class|default:''} w-full">
+                                                <img src="{$BANK_LOGO}" class="w-full">
+                                            </picture>
+                                        </figure>
+                                        <div class="SingleProduct-desc">
+                                            <div class="SingleProduct-title text-center">{$BANK_NAME}</div>
+                                        </div>
+                                    </a>
+                                {/loop}
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">
+                        <fieldset class="my-8">
+                            <input type="hidden" name="order_id" value="{$orderId}">
+                            <input type="hidden" id="bank_id" name="bank_id" value="">
+                        </fieldset>
+                    </form>
+                    {hook name="order-placed.additional-payment-info" module="$PAYMENT_MODULE" placed_order_id=$placed_order_id}
+                </div>
+            {/loop}
+        </article>
+    </div>
+{/block}
+
+{block name="javascript-initialization"}
+    {strip}
+        <script type="text/javascript">
+            document.querySelectorAll(".bank").forEach(bank =>
+                bank.addEventListener("click", function (ev) {
+                    ev.preventDefault();
+                    const inputBankId = document.getElementById('bank_id');
+                    const form = document.getElementById('payment_request_form');
+                    inputBankId.value = this.dataset.id;
+                    form.submit();
+                }));
+
+                document.getElementById('payment_request_form').addEventListener("click", function (ev) {
+                    ev.preventDefault();
+                    const inputBankId = document.getElementById('bank_id');
+                    const form = document.getElementById('payment_request_form');
+                    inputBankId.value = this.dataset.id;
+                    form.submit();
+                })
+        </script>
+    {/strip}
+{/block}

@@ -173,7 +173,7 @@ class BridgePayment extends AbstractPaymentModule
     public function isValidPayment(): bool
     {
         $valid = true;
-        if ('TEST' === self::getConfigValue('run_mode')) {
+        if ('Test' === self::getConfigValue('run_mode')) {
             $raw_ips = explode("\n", self::getConfigValue('allowed_ip_list', ''));
 
             $allowed_client_ips = [];

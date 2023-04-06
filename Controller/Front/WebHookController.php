@@ -2,12 +2,11 @@
 
 namespace BridgePayment\Controller\Front;
 
+use Exception;
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\Notification\Notification;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
-use BridgePayment\Service\WebHook;
-use Exception;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Thelia\Controller\Front\BaseFrontController;
@@ -54,7 +53,7 @@ class WebHookController extends BaseFrontController
                     break;
                 case "payment.transaction.updated":
                 case "payment.transaction.created":
-                    $paymentTransaction->savePaymentTransaction($notification->content);
+                    $paymentTransaction->savePaymentTransaction($notification->content, $notification->timestamp);
                     break;
                 default :
                     break;

@@ -40,12 +40,33 @@ class PaymentLinkRequest implements JsonSerializable
                 'currency' => $order->getCurrency()->getCode(),
                 'amount' => round($order->getTotalAmount(), 2),
                 'end_to_end_id' => $order->getRef(),
-                'beneficiary' => [
-                    "iban" => rtrim(BridgePayment::getConfigValue('iban')),
-                    "company_name" => ConfigQuery::read('store_name')
-                ]
+
             ]
         ];
+
+        $iban = rtrim(BridgePayment::getConfigValue('beneficiary_iban'));
+
+        $company_name = rtrim(BridgePayment::getConfigValue('beneficiary_companyname'));
+
+        $firstname = rtrim(BridgePayment::getConfigValue('beneficiary_firstname'));
+        $lastname = rtrim(BridgePayment::getConfigValue('beneficiary_lastname'));
+
+        if ($iban) {
+            if ($firstname && $lastname) {
+                $this->transactions['beneficiary'] = [
+                    "iban" => rtrim(BridgePayment::getConfigValue('beneficiary_iban')),
+                    "firstname" => $firstname,
+                    "lastname" => $lastname
+                ];
+            }
+
+            if ($company_name) {
+                $this->transactions['beneficiary'] = [
+                    "iban" => rtrim(BridgePayment::getConfigValue('beneficiary_iban')),
+                    "company_name" => rtrim(BridgePayment::getConfigValue('beneficiary_name', ConfigQuery::read('store_name')))
+                ];
+            }
+        }
 
         $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
         $this->clientReference = $order->getCustomer()->getRef();

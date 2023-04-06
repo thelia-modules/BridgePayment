@@ -14,26 +14,23 @@ use BridgePayment\Request\PaymentLinkRequest;
 use BridgePayment\Response\PaymentLinkResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Propel\Runtime\Exception\PropelException;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\Order;
 
 class PaymentLink
 {
     const PAYMENT_LINK_STATUS = [
-        [
-            'code' => 'VALID',
-            'label' => 'Valid'
+        'VALID' => [
+            'color' => '#bae313',
         ],
-        [
-            'code' => 'EXPIRED',
-            'label' => 'Expired'
+        'EXPIRED' => [
+            'color' => '#e31313'
         ],
-        [
-            'code' => 'REVOKED',
-            'label' => 'Revoked'
+        'REVOKED' => [
+            'color' => '#e3138b'
         ],
-        [
-            'code' => 'Completed',
-            'label' => 'COMPLETED'
+        'COMPLETED' => [
+            'color' => '#13e319'
         ]
     ];
 
@@ -83,9 +80,9 @@ class PaymentLink
     {
         $paymentLink = BridgePaymentLinkQuery::create()
             ->useOrderQuery()
-                ->useCustomerQuery()
-                    ->filterByRef($notification->clientReference)
-                ->endUse()
+            ->useCustomerQuery()
+            ->filterByRef($notification->clientReference)
+            ->endUse()
             ->endUse()
             ->filterByUuid($notification->paymentLinkId)
             ->findOne();
@@ -94,6 +91,58 @@ class PaymentLink
             throw new Exception(sprintf('Payment link not found on this customer : %s', $notification->clientReference));
         }
 
-        $paymentLink->setStatus($notification->status)->save();
+        if ($paymentLink->getStatus() === 'VALID') {
+            $paymentLink->setStatus($notification->status)->save();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function revokeLink(string $paymentLinkUuid): PaymentLinkResponse
+    {
+        $response = $this->apiService->apiCall(
+            'POST',
+            BridgePayment::BRIDGE_API_URL . "/v2/payment-links/$paymentLinkUuid/revoke",
+            []
+        );
+
+        if ($response->getStatusCode() >= 400) {
+            throw new Exception(
+                Translator::getInstance()->trans("Can't revoke link.", [], BridgePayment::DOMAIN_NAME)
+            );
+        }
+
+        $paymentLinkResponse = $this->serializer->deserialize(
+            $response->getContent(),
+            PaymentLinkResponse::class,
+            'json'
+        );
+
+        return $paymentLinkResponse;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function refreshLink(string $paymentLinkUuid)
+    {
+        $response = $this->apiService->apiCall(
+            'GET',
+            BridgePayment::BRIDGE_API_URL . "/v2/payment-links/$paymentLinkUuid",
+            []
+        );
+
+        if ($response->getStatusCode() >= 400) {
+            throw new Exception(
+                Translator::getInstance()->trans("Can't revoke link.", [], BridgePayment::DOMAIN_NAME)
+            );
+        }
+
+        return $this->serializer->deserialize(
+            $response->getContent(),
+            PaymentLinkResponse::class,
+            'json'
+        );
     }
 }

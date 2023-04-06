@@ -6,13 +6,10 @@
 
     <loops>
         <loop name="bank_list" class="BridgePayment\Loop\BankLoop" />
+        <loop name="payment_link_list" class="BridgePayment\Loop\PaymentLinkLoop" />
+        <loop name="payment_transaction_list" class="BridgePayment\Loop\PaymentTransactionLoop" />
     </loops>
-    <hooks>
-        <hook id="bridgepayment_back_hook" class="BridgePayment\Hook\BackHook">
-            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfigure" />
-            <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onOrderEditPaymentModuleBottom"/>
-        </hook>
-    </hooks>
+
 
     <services>
         <service id="bridgepayment.payment.link.service" alias="BridgePayment\Service\PaymentLink" public="true">

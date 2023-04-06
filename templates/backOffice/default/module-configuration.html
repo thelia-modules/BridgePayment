@@ -4,7 +4,7 @@
     <style>
         .block {
             padding: 20px;
-            border-bottom: 2px solid #00afd7;
+            border-bottom: 0.5px solid #00afd7;
         }
 
         .block h2 {
@@ -46,9 +46,7 @@
                 <div class="panel-body">
                     <div class="row">
                         <div class="block col-md-12" style="background-color: #00afd7;">
-                            <img style="height: 34px;"
-                                 src="{image file='BridgePayment/assets/bridge-logo.png' source="BridgePayment"}"
-                                 alt="Payment configuration" class="img-responsive"/>
+                            <img style="height: 34px;" src="{image file='BridgePayment/assets/bridge-logo.png' source="BridgePayment"}" class="img-responsive"/>
                         </div>
                         {if $form_error}
                         <div class="row">
@@ -110,11 +108,18 @@
                         <div class="block col-md-12">
                             <div class="col-md-12">
                                 <h2>{intl l="Beneficiary bank informations." d='bridgepayment.bo.default'}</h2>
+                                <span class="help-block">{intl l="For payments to different bank accounts. Mandatory firstname with lastname or only company_name"}</span>
                             </div>
                             <div class="col-md-6">
-                                {render_form_field field="beneficiary_name"}
+                                {render_form_field field="beneficiary_firstname"}
                             </div>
                             <div class="col-md-6">
+                                {render_form_field field="beneficiary_lastname"}
+                            </div>
+                            <div class="col-md-6">
+                                {render_form_field field="beneficiary_companyname"}
+                            </div>
+                            <div class="col-md-12">
                                 {render_form_field field="beneficiary_iban"}
                             </div>
                         </div>
