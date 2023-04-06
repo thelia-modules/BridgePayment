@@ -10,7 +10,9 @@
 
     <column name="order_id" required="true" type="INTEGER"/>
 
-    <column name="expired_at" type="DATE"/>
+    <column name="amount" scale="6" size="16" type="DECIMAL" />
+
+    <column name="expired_at" type="TIMESTAMP"/>
 
     <behavior name="timestampable" />
 
@@ -32,8 +34,12 @@
     <column name="status" size="50" type="VARCHAR" />
     <column name="status_reason" size="150" type="VARCHAR" />
 
+    <column name="amount" scale="6" size="16" type="DECIMAL" />
+
     <column name="payment_link_id" size="150" type="VARCHAR" />
     <column name="payment_request_id" required="true" size="150" type="VARCHAR" />
+
+    <column name="timestamp" required="true" type="TIMESTAMP"/>
 
     <behavior name="timestampable" />
 

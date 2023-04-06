@@ -82,9 +82,9 @@ class FrontController extends BaseFrontController
             if ($status === 'abort' && $customerRef && $paymentLinkId) {
                 $paymentLink = BridgePaymentLinkQuery::create()
                     ->useOrderQuery()
-                        ->useCustomerQuery()
-                            ->filterByRef($customerRef)
-                        ->endUse()
+                    ->useCustomerQuery()
+                    ->filterByRef($customerRef)
+                    ->endUse()
                     ->endUse()
                     ->filterByUuid($paymentLinkId)
                     ->filterByStatus('VALID')
@@ -102,7 +102,7 @@ class FrontController extends BaseFrontController
 
                 $parserContext->set('payment_link_url', $paymentLink->getLink());
 
-                return $this->render('order-cancel');
+                return $this->render('callback');
             }
 
             if ($status !== 'success') {
@@ -147,4 +147,20 @@ class FrontController extends BaseFrontController
             );
         }
     }
+
+    /**
+     * @Route("/bank/search/{orderId}", name="bridgepayment_bank_search_order_cancel", methods="GET")
+     */
+    public function searchBank(Request $request, int $orderId)
+    {
+        $order = OrderQuery::create()->findPk($orderId);
+        $search = $request->get('search');
+
+        if (!$order) {
+            return $this->pageNotFound();
+        }
+
+        return $this->render("bank-template", ['orderId' => $orderId, "search" => $search]);
+    }
+
 }
