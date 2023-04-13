@@ -33,41 +33,14 @@ class BridgePaymentInitiation
             ],
             "bank_id" => (int)$bankId,
             "client_reference" => $order->getCustomer()->getRef(),
+            "transactions" => [
+                "currency" => $order->getCurrency()->getCode(),
+                "label" => $order->getRef(),
+                "amount" => round($order->getTotalAmount(), 2),
+                "client_reference" => $order->getCustomer()->getRef(),
+                "end_to_end_id" => $order->getRef()
+            ]
         ];
-
-        $transactions = [
-            "currency" => $order->getCurrency()->getCode(),
-            "label" => $order->getRef(),
-            "amount" => round($order->getTotalAmount(), 2),
-            "client_reference" => $order->getCustomer()->getRef(),
-            "end_to_end_id" => $order->getRef()
-        ];
-
-        $iban = rtrim(BridgePayment::getConfigValue('beneficiary_iban'));
-
-        $company_name = rtrim(BridgePayment::getConfigValue('beneficiary_companyname'));
-
-        $firstname = rtrim(BridgePayment::getConfigValue('beneficiary_firstname'));
-        $lastname = rtrim(BridgePayment::getConfigValue('beneficiary_lastname'));
-
-        if ($iban) {
-            if ($firstname && $lastname) {
-                $transactions['beneficiary'] = [
-                    "iban" => rtrim(BridgePayment::getConfigValue('beneficiary_iban')),
-                    "firstname" => $firstname,
-                    "lastname" => $lastname
-                ];
-            }
-
-            if ($company_name) {
-                $transactions['beneficiary'] = [
-                    "iban" => rtrim(BridgePayment::getConfigValue('beneficiary_iban')),
-                    "company_name" => rtrim(BridgePayment::getConfigValue('beneficiary_name', ConfigQuery::read('store_name')))
-                ];
-            }
-        }
-
-        $data['transactions'] = [$transactions];
 
         $response = $this->apiService->apiCall(
             'POST',
