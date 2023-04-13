@@ -1,0 +1,19 @@
+{ifloop rel="bank_list"}
+{loop type="bank_list" name="bank_list" search=$search order_id=$orderId}
+    <a href="#" class="SingleProduct bank" data-id="{$BANK_ID}">
+        <figure class="SingleProduct-img">
+            <picture class="ResponsiveImage {$class|default:''} w-full">
+                <img src="{$BANK_LOGO}" class="w-full">
+            </picture>
+        </figure>
+        <div class="SingleProduct-desc">
+            <div class="SingleProduct-title text-center">{$BANK_NAME}</div>
+        </div>
+    </a>
+{/loop}
+{/ifloop}
+{elseloop rel="bank_list"}
+    <div class="col-lg-12">
+        <span class="alert alert-info">{intl l="Aucune banque trouvée."}</span>
+    </div>
+{/elseloop}

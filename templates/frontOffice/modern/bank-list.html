@@ -50,22 +50,11 @@
                     </div>
                     <div style="width: 100%;" class="p-1">
                         <div id="GridProductWrapper" class="mb-3 md:mb-3 GridProductWrapper">
-                            <label for="search_bank" class="Input mb-2">
+                            <label for="search_bank" class="Input mb-5">
                                 <input type="text" class="Input-field text-primary" placeholder="{intl l='Search banks'}" id="search_bank" name="search_bank" value="">
                             </label>
                             <div id="GridProduct" class="ProductList">
-                                {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
-                                    <a href="#" class="SingleProduct bank" data-id="{$BANK_ID}">
-                                        <figure class="SingleProduct-img">
-                                            <picture class="ResponsiveImage {$class|default:''} w-full">
-                                                <img src="{$BANK_LOGO}" class="w-full">
-                                            </picture>
-                                        </figure>
-                                        <div class="SingleProduct-desc">
-                                            <div class="SingleProduct-title text-center">{$BANK_NAME}</div>
-                                        </div>
-                                    </a>
-                                {/loop}
+                                
                             </div>
                         </div>
                     </div>
@@ -101,7 +90,31 @@
                     const form = document.getElementById('payment_request_form');
                     inputBankId.value = this.dataset.id;
                     form.submit();
-                })
+                });
+
+            const inputSearch = document.getElementById("search_bank");
+            const contentBanks = document.getElementById("GridProduct");
+
+            inputSearch.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+
+                    var searchWord = this.value;
+
+                    !async function () {
+                        contentBanks.innerHTML = await fetch("/bridge/bank/search/{$orderId}?search="+searchWord, {
+                            method: "GET"
+                        })
+                            .then((response) => response.text())
+                            .then((result) => {
+                                return result;
+                            })
+                            .catch((error) => {
+                                console.log(error)
+                            });
+                    }();
+                }
+            });
         </script>
     {/strip}
 {/block}

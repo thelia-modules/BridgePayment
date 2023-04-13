@@ -91,54 +91,6 @@ class BridgePaymentConfiguration extends BaseForm
                 ]
             )
             ->add(
-                'beneficiary_iban',
-                TextType::class,
-                [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('IBAN', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'beneficiary_iban'
-                    ],
-                    'data' => BridgePayment::getConfigValue('beneficiary_iban', ''),
-                ]
-            )
-            ->add(
-                'beneficiary_companyname',
-                TextType::class,
-                [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('Company name', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'beneficiary_companyname'
-                    ],
-                    'data' => BridgePayment::getConfigValue('beneficiary_companyname', ''),
-                ]
-            )
-            ->add(
-                'beneficiary_firstname',
-                TextType::class,
-                [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('Firstname', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'beneficiary_firstname'
-                    ],
-                    'data' => BridgePayment::getConfigValue('beneficiary_firstname', ''),
-                ]
-            )
-            ->add(
-                'beneficiary_lastname',
-                TextType::class,
-                [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('Lastname', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'beneficiary_lastname'
-                    ],
-                    'data' => BridgePayment::getConfigValue('beneficiary_lastname', ''),
-                ]
-            )
-            ->add(
                 'redirect_mode',
                 CheckboxType::class,
                 [
