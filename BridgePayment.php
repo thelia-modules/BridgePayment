@@ -3,14 +3,14 @@
 namespace BridgePayment;
 
 use BridgePayment\Exception\BridgePaymentLinkException;
-use BridgePayment\Service\BridgeApiService;
 use BridgePayment\Service\PaymentLink;
+use BridgePayment\Service\Provider\SerializerAnnotationsServiceProvider;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Thelia\Core\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Thelia\Install\Database;
 use Thelia\Log\Tlog;
 use Thelia\Model\Order;
@@ -22,22 +22,23 @@ use Thelia\Tools\URL;
 class BridgePayment extends AbstractPaymentModule
 {
     /** @var string */
-    const DOMAIN_NAME = 'bridgepayment';
-
-    const BRIDGE_API_VERSION = '2021-06-01';
-    const BRIDGE_API_URL = 'https://api.bridgeapi.io';
+    public const DOMAIN_NAME = 'bridgepayment';
+    /** @var string */
+    public const BRIDGE_API_VERSION = '2021-06-01';
+    /** @var string */
+    public const BRIDGE_API_URL = 'https://api.bridgeapi.io';
 
     /**
      * @throws PropelException
      */
     public function postActivation(ConnectionInterface $con = null): void
     {
-        if (!$this->getConfigValue('is_initialized', false)) {
+        if (!self::getConfigValue('is_initialized', false)) {
             (new Database($con))->insertSql(null, array(__DIR__ . '/Config/TheliaMain.sql'));
 
-            $this->setConfigValue('is_initialized', true);
+            self::setConfigValue('is_initialized', true);
         }
-
+        (new Service\Provider\SerializerAnnotationsServiceProvider)->register();
         $statuses = [
             [
                 'code' => 'payment_rejected',
@@ -66,6 +67,20 @@ class BridgePayment extends AbstractPaymentModule
                         'description' => 'Payment with BridgePayment pending',
                     ]
                 ],
+            ],
+            [
+                'code' => 'payment_created',
+                'color' => '#d4773a',
+                'i18n' => [
+                    'fr_FR' => [
+                        'title' => 'Paiement crée',
+                        'description' => 'Paiement avec BridgePayment est crée',
+                    ],
+                    'en_US' => [
+                        'title' => 'Created payment',
+                        'description' => 'Payment with BridgePayment created',
+                    ]
+                ],
             ]
         ];
 
@@ -74,55 +89,60 @@ class BridgePayment extends AbstractPaymentModule
                 ->filterByCode($status['code'])
                 ->findOne();
 
-            if (null === $newStatus) {
-                $newStatus = (new OrderStatus())
-                    ->setCode($status['code'])
-                    ->setColor($status['color']);
-
-                foreach ($status['i18n'] as $locale => $statusI18n) {
-                    $newStatus
-                        ->setLocale($locale)
-                        ->setTitle($statusI18n['title'])
-                        ->setDescription($statusI18n['description']);
-                }
-
-                $newStatus
-                    ->setPosition($newStatus->getNextPosition())
-                    ->save();
+            if ($newStatus) {
+                continue;
             }
-        }
-    }
 
-    /**
-     * Defines how services are loaded in your modules
-     *
-     * @param ServicesConfigurator $servicesConfigurator
-     */
-    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
-    {
-        $servicesConfigurator->load(self::getModuleCode() . '\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()) . "/I18n/*"])
-            ->autowire()
-            ->autoconfigure();
+            $newStatus = (new OrderStatus())
+                ->setCode($status['code'])
+                ->setColor($status['color']);
+
+            foreach ($status['i18n'] as $locale => $statusI18n) {
+                $newStatus
+                    ->setLocale($locale)
+                    ->setTitle($statusI18n['title'])
+                    ->setDescription($statusI18n['description']);
+            }
+
+            $newStatus
+                ->setPosition($newStatus->getNextPosition())
+                ->save();
+        }
     }
 
     /**
      * @param Order $order
      * @return Response|RedirectResponse
      */
-    public function pay(Order $order): Response|RedirectResponse
+    public function pay(Order $order): Response
     {
         try {
-            if (BridgePayment::getConfigValue('redirect_mode', false)) {
-                /** @var PaymentLink $paymentLinkService */
-                $paymentLinkService = $this->container->get('bridgepayment.payment.link.service');
+            /** @var PaymentLink $paymentLinkService */
+            $paymentLinkService = $this->container->get('bridgepayment.payment.link.service');
 
+            if (self::getConfigValue('redirect_mode', false)) {
                 return new RedirectResponse($paymentLinkService->createPaymentLink($order));
             }
 
+            $parser = $this->getContainer()->get("thelia.parser");
+
+            $parser->setTemplateDefinition(
+                $parser->getTemplateHelper()->getActiveFrontTemplate(),
+                true
+            );
+
+            $renderedTemplate = $parser->render(
+                "bank-list.html",
+                [
+                    "orderId" => $order->getId()
+                ]
+            );
+
+            return new Response($renderedTemplate);
+
         } catch (BridgePaymentLinkException $bridgePaymentLinkexception) {
             $errorMessage = $bridgePaymentLinkexception->getFormatedErrorMessage();
-        } catch (Exception $ex) {
+        } catch (Exception|GuzzleException $ex) {
             $errorMessage = $ex->getMessage();
             Tlog::getInstance()->error($errorMessage);
         }
@@ -135,38 +155,12 @@ class BridgePayment extends AbstractPaymentModule
                 ]
             )
         );
-
-        /** @var BridgeApiService $apiService */
-        /*
-        $apiService = $this->container->get('bridgepayment.api.service');
-
-        $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
-        $banks = $apiService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
-
-        $parser = $this->getContainer()->get("thelia.parser");
-
-        $parser->setTemplateDefinition(
-            $parser->getTemplateHelper()->getActiveFrontTemplate(),
-            true
-        );
-
-        $renderedTemplate = $parser->render(
-            "bank-list.html",
-            array_merge(
-                [
-                    "order_id" => $order->getId()
-                ],
-                $banks
-            )
-        );
-
-        return new Response($renderedTemplate);*/
     }
 
     public function isValidPayment(): bool
     {
         $valid = true;
-        if ('TEST' === self::getConfigValue('run_mode')) {
+        if ('Test' === self::getConfigValue('run_mode')) {
             $raw_ips = explode("\n", self::getConfigValue('allowed_ip_list', ''));
 
             $allowed_client_ips = [];
@@ -177,7 +171,7 @@ class BridgePayment extends AbstractPaymentModule
 
             $client_ip = $this->getRequest()->getClientIp();
 
-            $valid = in_array($client_ip, $allowed_client_ips) || in_array('*', $allowed_client_ips);
+            $valid = in_array($client_ip, $allowed_client_ips, true) || in_array('*', $allowed_client_ips, true);
         }
 
         if ($valid) {

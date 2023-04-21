@@ -4,6 +4,14 @@ namespace BridgePayment\Response;
 
 class PaymentLinkResponse
 {
-    public ?string $uuid = null;
-    public ?string $url = null;
+    /** @var string  */
+    public $id;
+    /** @var string  */
+    public $url;
+    /** @var string  */
+    public $status;
+    /** @var string  */
+    public $expiredAt;
+    /** @var string  */
+    public $expired_at;
 }

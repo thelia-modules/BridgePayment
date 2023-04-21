@@ -1,15 +1,12 @@
 <?php
 
-namespace BridgePayment\Controller;
+namespace BridgePayment\Controller\Back;
 
-use Exception;
 use BridgePayment\BridgePayment;
-use BridgePayment\Form\BridgePaymentConfiguration;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Exception;
+use GuzzleHttp\Psr7\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Thelia\Controller\Admin\BaseAdminController;
-use Symfony\Component\Routing\Annotation\Route;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
@@ -17,20 +14,35 @@ use Thelia\Form\Exception\FormValidationException;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/admin/module/bridgepayment", name="bridgepayment_configure")
+ * route: "/admin/module/bridgepayment"
+ * name: "bridgepayment_configure"
  */
 class ConfigurationController extends BaseAdminController
 {
     /**
-     * @Route("/configure", name="_save", methods="POST")
+     *  route : ""
+     *  name: "_view"
+     *  methods: "GET"
      */
-    public function configure(Request $request): Response|RedirectResponse
+    public function view()
     {
+        return $this->render('module-configuration');
+    }
+
+    /**
+     * route : "/configure"
+     * name: "_save"
+     * methods: "POST")
+     */
+    public function configure(): Response
+    {
+        /** @var Request $request */
+        $request = $this->getRequest();
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'BridgePayment', AccessManager::UPDATE)) {
             return $response;
         }
 
-        $configurationForm = $this->createForm(BridgePaymentConfiguration::getName());
+        $configurationForm = $this->createForm("bridgepayment_form_bridge_payment_configuration");
 
         try {
             $form = $this->validateForm($configurationForm, "POST");
@@ -45,13 +57,7 @@ class ConfigurationController extends BaseAdminController
                 BridgePayment::setConfigValue($name, $value);
             }
 
-            $route = '/admin/modules';
-
-            if ($request->get('save_mode') === 'stay') {
-                $route = '/admin/module/BridgePayment';
-            }
-
-            return $this->generateRedirect(URL::getInstance()->absoluteUrl($route));
+            return $this->generateRedirect(URL::getInstance()->absoluteUrl('/admin/module/BridgePayment'));
 
         } catch (FormValidationException $ex) {
             $error_msg = $this->createStandardFormValidationErrorMessage($ex);
@@ -60,7 +66,7 @@ class ConfigurationController extends BaseAdminController
         }
 
         $this->setupFormErrorContext(
-            Translator::getInstance()->trans("Scalapay configuration", [], BridgePayment::DOMAIN_NAME),
+            Translator::getInstance()->trans("Configuration", [], BridgePayment::DOMAIN_NAME),
             $error_msg,
             $configurationForm,
             $ex

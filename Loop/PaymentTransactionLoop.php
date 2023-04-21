@@ -6,6 +6,8 @@ use BridgePayment\BridgePayment;
 use BridgePayment\Model\BridgePaymentTransaction;
 use BridgePayment\Model\BridgePaymentTransactionQuery;
 use BridgePayment\Service\PaymentTransaction;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
+use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
@@ -14,17 +16,21 @@ use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Core\Translation\Translator;
 
+/**
+ * @method getOrderId()
+ * @method getPaymentLinkId()
+ */
 class PaymentTransactionLoop extends BaseLoop implements PropelSearchLoopInterface
 {
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
             Argument::createIntTypeArgument('order_id'),
-            Argument::createAlphaNumStringTypeArgument('payment_link_id'),
+            Argument::createAlphaNumStringTypeArgument('payment_link_id')
         );
     }
 
-    public function buildModelCriteria()
+    public function buildModelCriteria(): ModelCriteria
     {
         $query = BridgePaymentTransactionQuery::create()
             ->useOrderQuery()
@@ -38,7 +44,10 @@ class PaymentTransactionLoop extends BaseLoop implements PropelSearchLoopInterfa
         return $query;
     }
 
-    public function parseResults(LoopResult $loopResult)
+    /**
+     * @throws PropelException
+     */
+    public function parseResults(LoopResult $loopResult): LoopResult
     {
         /** @var BridgePaymentTransaction $paymentTransaction */
         foreach ($loopResult->getResultDataCollection() as $paymentTransaction) {

@@ -2,32 +2,30 @@
 
 namespace BridgePayment\Service;
 
-use BridgePayment\Request\BankRequest;
 use BridgePayment\BridgePayment;
 use Exception;
-use Symfony\Component\Serializer\SerializerInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Thelia\Core\Translation\Translator;
 
 class BankService
 {
-    public function __construct(
-        protected BridgeApi           $apiService,
-        protected SerializerInterface $serializer
-    )
+    /** @var BridgeApi  */
+    protected $apiService;
+
+    public function __construct( BridgeApi $apiService)
     {
+        $this->apiService = $apiService;
     }
 
     /**
-     * @param string $countryCode
+     * @throws Exception|GuzzleException
      */
     public function getBanks(string $countryCode): array
     {
         $response = $this->apiService->apiCall(
             'GET',
-            BridgePayment::BRIDGE_API_URL . '/v2/banks?capabilities=single_payment&limit=500',
-            [
-                'country_code' => $countryCode
-            ]
+            BridgePayment::BRIDGE_API_URL . '/v2/banks?countries=' . $countryCode . '&capabilities=single_payment&limit=500',
+            ""
         );
 
         if ($response->getStatusCode() >= 400) {
@@ -36,7 +34,7 @@ class BankService
             );
         }
 
-        $banksResponse = json_decode($response->getContent(), true);
+        $banksResponse = json_decode($response->getBody()->getContents(), true);
 
         return $banksResponse['resources'] ?? [];
     }

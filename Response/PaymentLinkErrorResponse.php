@@ -4,8 +4,12 @@ namespace BridgePayment\Response;
 
 class PaymentLinkErrorResponse
 {
-    public string $type;
-    public string $message;
-    public string $documentationUrl;
-    public array $errors;
+    /** @var string $type*/
+    public $type;
+    /** @var string */
+    public $message;
+    /** @var string */
+    public $documentationUrl;
+    /** @var array */
+    public $errors;
 }

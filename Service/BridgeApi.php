@@ -3,32 +3,34 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\BridgePayment;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Psr\Http\Message\ResponseInterface;
 
 class BridgeApi
 {
-    public function __construct(
-        protected HttpClientInterface $httpClient
-    )
-    {
-    }
-
     /**
-     * @throws TransportExceptionInterface
+     * @param mixed $data
+     * @throws GuzzleException
      */
-    public function apiCall($method, $request, $data): ResponseInterface
+    public function apiCall(
+        string $method,
+        string $uri,
+        $data
+    ): ResponseInterface
     {
+//        BridgePayment::setConfigValue('client_id', "9013e9c76c8e4a588bec1deb9eea7cea");
+//        BridgePayment::setConfigValue('client_secret', '43bZ6G15dPIEbiRKO1ISlzZfzfpofd8a4lFcUMd1UuLuzbKj0kKdOfeEK6jC4jNh');
+        $httpClient = new Client();
         $clientId = BridgePayment::getConfigValue('client_id');
         $clientSecret = BridgePayment::getConfigValue('client_secret');
 
-        return $this->httpClient->request($method, $request, [
+        return $httpClient->request($method, $uri, [
             'headers' => [
-                'Client-Id' => $clientId,
-                'Client-Secret' => $clientSecret,
                 'Bridge-Version' => BridgePayment::BRIDGE_API_VERSION,
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Client-Id' => $clientId,
+                'Client-Secret' => $clientSecret
             ],
             'json' => $data
         ]);
