@@ -2,13 +2,12 @@
 
 namespace BridgePayment\Controller\Front;
 
-use Exception;
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\Notification\Notification;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use Exception;
+use Symfony\Component\Serializer\Serializer;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
@@ -16,21 +15,28 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Log\Tlog;
 
 /**
- * @Route("/bridge/notification", name="bridgepayment_notification")
+ * route : "/bridge/notification"
+ * name : "bridgepayment_notification")
  */
 class WebHookController extends BaseFrontController
 {
     /**
-     * @Route("", name="", methods="POST")
+     * route : ""
+     * name : ""
+     * methods : "POST")
      */
-    public function notification(
-        Request             $request,
-        SerializerInterface $serializer,
-        PaymentLink         $paymentLinkService,
-        PaymentTransaction  $paymentTransaction
-    ): Response
+    public function notification(): Response
     {
         try {
+            $request = $this->getRequest();
+            $serializer = new Serializer();
+
+            /** @var PaymentLink $paymentLinkService */
+            $paymentLinkService = $this->getContainer()->get('bridgepayment.payment.link.service');
+
+            /** @var PaymentTransaction $paymentTransaction */
+            $paymentTransaction = $this->getContainer()->get('bridgepayment.payment.transaction.service');
+
             if (!$webhookSecret = BridgePayment::getConfigValue('hook_secret')) {
                 Tlog::getInstance()->addError('Bridge payment configuration missing.');
                 throw new Exception(

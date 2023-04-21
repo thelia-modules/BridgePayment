@@ -18,7 +18,7 @@ use Thelia\Model\CountryQuery;
 
 class BridgePaymentConfiguration extends BaseForm
 {
-    protected function buildForm()
+    protected function buildForm(): void
     {
         $this->formBuilder
             ->add(
@@ -174,7 +174,7 @@ class BridgePaymentConfiguration extends BaseForm
         $event = (new BridgeBankEvent())
             ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country', 64)));
 
-        $this->dispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
+        $this->dispatcher->dispatch(BridgeBankEvent::GET_BANKS_EVENT, $event);
 
         if($event->getError()){
             return [];

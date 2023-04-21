@@ -6,7 +6,8 @@ use BridgePayment\Response\PaymentLinkErrorResponse;
 
 class BridgePaymentLinkException extends \Exception
 {
-    protected PaymentLinkErrorResponse $paymentLinkErrorResponse;
+    /** @var PaymentLinkErrorResponse */
+    protected $paymentLinkErrorResponse;
 
     public function __construct(PaymentLinkErrorResponse $errorResponse)
     {

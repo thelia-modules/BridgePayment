@@ -2,12 +2,16 @@
 
 namespace BridgePayment\Service;
 
+use DateTime;
+use Exception;
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\BridgePaymentTransactionQuery;
-use Exception;
 use BridgePayment\Model\BridgePaymentTransaction;
 use BridgePayment\Model\Notification\NotificationContent;
+use GuzzleHttp\Exception\GuzzleException;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -18,22 +22,34 @@ use Thelia\Model\OrderStatusQuery;
 
 class PaymentTransaction
 {
-    const PAYMENT_TRANSACTION_STATUS = [
+    public const PAYMENT_TRANSACTION_STATUS = [
         'CREA' => '#bae313',
         'ACTC' => '#bae313',
         'PDNG' => '#138ce3',
         'ACSC' => '#13e319',
         'RJCT' => '#e3138b'
     ];
+    /** @var BridgeApi */
+    protected $apiService;
+    /** @var SerializerInterface */
+    protected $serializer;
+    /** @var EventDispatcherInterface */
+    protected $dispatcher;
 
     public function __construct(
-        protected BridgeApi                $apiService,
-        protected SerializerInterface      $serializer,
-        protected EventDispatcherInterface $dispatcher
+        BridgeApi                $apiService,
+        EventDispatcherInterface $dispatcher
     )
     {
+        $this->dispatcher = $dispatcher;
+        $this->serializer = new Serializer();
+        $this->apiService = $apiService;
     }
 
+    /**
+     * @throws GuzzleException
+     * @throws Exception
+     */
     public function getPaymentTransactionRequest(string $paymentRequestId): void
     {
         $response = $this->apiService->apiCall(
@@ -68,7 +84,7 @@ class PaymentTransaction
             ->findOne();
 
         $timestamp = substr($timestamp, 0, 10);
-        $timestamp =  new \DateTime("@$timestamp");
+        $timestamp =  new DateTime("@$timestamp");
 
         if ($bridgePaymentTransaction) {
             if (in_array($bridgePaymentTransaction->getStatus(), ['ACSC', 'RJCT'])) {
@@ -106,15 +122,28 @@ class PaymentTransaction
         }
     }
 
+    /**
+     * @throws PropelException
+     */
     protected function updateOrderStatus(string $status, Order $order, string $transactionRef = null): void
     {
-        $orderStatusCode = match ($status) {
-            "CREA", "ACTC" => 'payment_created',
-            "PDNG" => "payment_pending",
-            "RJCT" => "payment_rejected",
-            "ACSC" => "paid",
-            default => 'payment_created'
-        };
+        switch ($status) {
+            case "CREA":
+            case "ACTC":
+                $orderStatusCode = 'payment_created';
+                break;
+            case "PDNG":
+                $orderStatusCode = "payment_pending";
+                break;
+            case "RJCT":
+                $orderStatusCode = "payment_rejected";
+                break;
+            case "ACSC":
+                $orderStatusCode = "paid";
+                break;
+            default :
+                $orderStatusCode = 'payment_created';
+        }
 
         $orderStatus = OrderStatusQuery::create()
             ->filterByCode($orderStatusCode)
@@ -122,10 +151,7 @@ class PaymentTransaction
 
         if (null !== $orderStatus) {
             $event = (new OrderEvent($order))->setStatus($orderStatus->getId());
-            $this->dispatcher->dispatch(
-                $event,
-                TheliaEvents::ORDER_UPDATE_STATUS
-            );
+            $this->dispatcher->dispatch( TheliaEvents::ORDER_UPDATE_STATUS, $event);
 
             if ($event->getOrder()->isPaid()) {
                 $event->getOrder()->setTransactionRef($transactionRef)->save();

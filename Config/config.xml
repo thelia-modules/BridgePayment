@@ -10,13 +10,48 @@
         <loop name="payment_transaction_list" class="BridgePayment\Loop\PaymentTransactionLoop" />
     </loops>
 
+    <forms>
+        <form name="bridgepayment_form_bridge_payment_configuration" class="BridgePayment\Form\BridgePaymentConfiguration" />
+    </forms>
 
     <services>
-        <service id="bridgepayment.payment.link.service" alias="BridgePayment\Service\PaymentLink" public="true">
+        <!-- SERVICES -->
+        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApi" />
+
+        <service id="bridgepayment.bank.service" class="BridgePayment\Service\BankService">
+            <argument type="service" id="bridgepayment.api.service" />
         </service>
 
-        <service id="bridgepayment.bank.service" alias="BridgePayment\Service\BankService" public="true">
+        <service id="bridgepayment.bridge.payment.initiation" class="BridgePayment\Service\BridgePaymentInitiation">
+            <argument type="service" id="bridgepayment.api.service" />
         </service>
+
+        <service id="bridgepayment.payment.link.service" class="BridgePayment\Service\PaymentLink">
+            <argument type="service" id="bridgepayment.api.service"/>
+        </service>
+
+        <service id="bridgepayment.payment.transaction.service" class="BridgePayment\Service\PaymentTransaction">
+            <argument type="service" id="bridgepayment.api.service"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="bridgepayment.refund.service" class="BridgePayment\Service\RefundService">
+            <argument type="service" id="bridgepayment.api.service"/>
+        </service>
+
+        <!-- LISTENERS -->
+        <service id="bridgepayment.bridge.bank.event.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
+            <argument type="service" id="bridgepayment.bank.service"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
     </services>
+
+    <hooks>
+        <hook id="bridgepayment.hook" class="BridgePayment\Hook\BackHook">
+            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
+            <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
+        </hook>
+    </hooks>
 
 </config>

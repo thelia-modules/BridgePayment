@@ -3,46 +3,42 @@
 namespace BridgePayment\EventListeners;
 
 use BridgePayment\Event\BridgeBankEvent;
-use BridgePayment\Service\BridgeApiService;
-use JetBrains\PhpStorm\ArrayShape;
+use BridgePayment\Service\BankService;
+use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class BridgeBankEventListener implements EventSubscriberInterface
 {
+    /** @var BridgeBankEvent */
+    protected $bankService;
+
     public function __construct(
-        protected BridgeApiService $bridgeApiService
+        BankService $bankService
     )
     {
+        $this->bankService = $bankService;
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
-    public function getBanks(BridgeBankEvent $bridgeBankEvent)
+    public function getBanks(BridgeBankEvent $bridgeBankEvent) : void
     {
         if (!$bridgeBankEvent->getCountry()) {
             return;
         }
 
-        $result = $this->bridgeApiService->getBanks($bridgeBankEvent->getCountry()->getIsoalpha2());
+        $result = $this->bankService->getBanks($bridgeBankEvent->getCountry()->getIsoalpha2());
 
         if (array_key_exists('error', $result)) {
             $bridgeBankEvent->setError($result['error']);
         }
 
-        if (array_key_exists('banks', $result)) {
-            $bridgeBankEvent->setBanks($result['banks']);
+        if ($result && count($result) >= 1) {
+            $bridgeBankEvent->setBanks($result);
         }
     }
 
-    #[ArrayShape([BridgeBankEvent::GET_BANKS_EVENT => "array"])]
     public static function getSubscribedEvents(): array
     {
         return [
