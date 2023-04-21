@@ -110,7 +110,7 @@ class User
      */
     public function jsonSerialize()
     {
-        AnnotationRegistry::registerAutoloadNamespace(__CLASS__);
+        AnnotationRegistry::registerAutoloadNamespace("BridgePayment\Request");
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $normalizers = [
             new ObjectNormalizer($classMetadataFactory),
