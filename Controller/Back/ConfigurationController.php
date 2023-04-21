@@ -3,13 +3,10 @@
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\BridgePayment;
-use BridgePayment\Form\BridgePaymentConfiguration;
 use Exception;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use GuzzleHttp\Psr7\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Thelia\Controller\Admin\BaseAdminController;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
@@ -17,12 +14,15 @@ use Thelia\Form\Exception\FormValidationException;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/admin/module/BridgePayment", name="bridgepayment_configure")
+ * route: "/admin/module/bridgepayment"
+ * name: "bridgepayment_configure"
  */
 class ConfigurationController extends BaseAdminController
 {
     /**
-     * @Route("", name="_view", methods="GET")
+     *  route : ""
+     *  name: "_view"
+     *  methods: "GET"
      */
     public function view()
     {
@@ -30,15 +30,19 @@ class ConfigurationController extends BaseAdminController
     }
 
     /**
-     * @Route("/configure", name="_save", methods="POST")
+     * route : "/configure"
+     * name: "_save"
+     * methods: "POST")
      */
-    public function configure(Request $request): Response|RedirectResponse
+    public function configure(): Response
     {
+        /** @var Request $request */
+        $request = $this->getRequest();
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'BridgePayment', AccessManager::UPDATE)) {
             return $response;
         }
 
-        $configurationForm = $this->createForm(BridgePaymentConfiguration::getName());
+        $configurationForm = $this->createForm("bridgepayment_form_bridge_payment_configuration");
 
         try {
             $form = $this->validateForm($configurationForm, "POST");

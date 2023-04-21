@@ -2,18 +2,15 @@
 
 namespace BridgePayment\Controller\Front;
 
-use Exception;
-use Front\Front;
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\BridgePaymentLinkQuery;
 use BridgePayment\Model\BridgePaymentTransactionQuery;
+use Exception;
+use Front\Front;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
-use Thelia\Core\Security\SecurityContext;
-use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Exception\TheliaProcessException;
 use Thelia\Log\Tlog;
@@ -21,21 +18,23 @@ use Thelia\Model\OrderQuery;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/bridge", name="bridgepayment_order")
+ * route : "/bridge"
+ * name : "bridgepayment_order")
  */
 class FrontController extends BaseFrontController
 {
     /**
-     * @Route("/payment/{orderId}", name="bridgepayment_order_cancel", methods="GET")
+     * route : "/payment/{orderId}"
+     * name : "bridgepayment_order_cancel"
+     * methods : "GET")
+     * @return Response|RedirectResponse
      */
-    public function paymentCallback(
-        Request         $request,
-        SecurityContext $securityContext,
-        ParserContext   $parserContext,
-        int             $orderId
-    ): Response|RedirectResponse
+    public function paymentCallback( int $orderId ): Response
     {
         try {
+            /** @var Request $request */
+            $request = $this->getRequest();
+
             if (!$cancelOrder = OrderQuery::create()->findPk($orderId)) {
                 Tlog::getInstance()->warning("Failed order ID '$orderId' not found.");
 
@@ -50,7 +49,7 @@ class FrontController extends BaseFrontController
                 );
             }
 
-            $customer = $securityContext->getCustomerUser();
+            $customer = $this->getSecurityContext()->getCustomerUser();
 
             if (null === $customer || $cancelOrder->getCustomerId() !== $customer->getId()) {
                 throw new TheliaProcessException(
@@ -100,7 +99,7 @@ class FrontController extends BaseFrontController
                     );
                 }
 
-                $parserContext->set('payment_link_url', $paymentLink->getLink());
+                $this->getParserContext()->set('payment_link_url', $paymentLink->getLink());
 
                 return $this->render('callback');
             }
@@ -149,12 +148,17 @@ class FrontController extends BaseFrontController
     }
 
     /**
-     * @Route("/bank/search/{orderId}", name="bridgepayment_bank_search_order_cancel", methods="GET")
+     * route : "/bank/search/{orderId}"
+     * name : "bridgepayment_bank_search_order_cancel"
+     * methods : "GET")
      */
-    public function searchBank(Request $request, int $orderId)
+    public function searchBank(int $orderId) : Response
     {
-        $order = OrderQuery::create()->findPk($orderId);
+        /** @var Request $request */
+        $request = $this->getRequest();
         $search = $request->get('search');
+
+        $order = OrderQuery::create()->findPk($orderId);
 
         if (!$order) {
             return $this->pageNotFound();

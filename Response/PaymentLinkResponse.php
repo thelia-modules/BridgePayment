@@ -4,9 +4,14 @@ namespace BridgePayment\Response;
 
 class PaymentLinkResponse
 {
-    public string $id;
-    public string $url;
-    public string $status;
-    public string $expiredAt;
-    public string $expired_at;
+    /** @var string  */
+    public $id;
+    /** @var string  */
+    public $url;
+    /** @var string  */
+    public $status;
+    /** @var string  */
+    public $expiredAt;
+    /** @var string  */
+    public $expired_at;
 }

@@ -3,6 +3,8 @@
 namespace BridgePayment\Loop;
 
 use BridgePayment\Service\BankService;
+use GuzzleHttp\Exception\GuzzleException;
+use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
@@ -11,9 +13,13 @@ use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\Base\OrderQuery;
 
+/**
+ * @method getOrderId()
+ * @method getSearch()
+ */
 class BankLoop extends BaseLoop implements ArraySearchLoopInterface
 {
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
             Argument::createIntTypeArgument('order_id'),
@@ -21,7 +27,11 @@ class BankLoop extends BaseLoop implements ArraySearchLoopInterface
         );
     }
 
-    public function buildArray()
+    /**
+     * @throws GuzzleException
+     * @throws PropelException
+     */
+    public function buildArray(): array
     {
         $order = OrderQuery::create()->findPk($this->getOrderId());
 
@@ -37,11 +47,11 @@ class BankLoop extends BaseLoop implements ArraySearchLoopInterface
         return $bankService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
     }
 
-    public function parseResults(LoopResult $loopResult)
+    public function parseResults(LoopResult $loopResult): LoopResult
     {
         $search = $this->getSearch();
         foreach ($loopResult->getResultDataCollection() as $bank) {
-            if ($search && false === strpos(strtolower($bank['name']), strtolower($search))) {
+            if ($search && false === stripos($bank['name'], $search)) {
                 continue;
             }
 
