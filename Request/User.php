@@ -2,6 +2,7 @@
 
 namespace BridgePayment\Request;
 
+use BridgePayment\Service\Provider\SerializerAnnotationsServiceProvider;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -10,7 +11,6 @@ use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use BridgePayment\Request\User;
 
 class User
 {
@@ -110,10 +110,10 @@ class User
      */
     public function jsonSerialize()
     {
-        AnnotationRegistry::registerAutoloadNamespace("BridgePayment\Request");
+        AnnotationRegistry::loadAnnotationClass(Groups::class);
         $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
         $normalizers = [
-            new ObjectNormalizer($classMetadataFactory),
+            new ObjectNormalizer($classMetadataFactory)
 //            new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())
         ];
         $serializer = new Serializer($normalizers);
