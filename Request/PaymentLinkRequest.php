@@ -2,20 +2,22 @@
 
 namespace BridgePayment\Request;
 
-use Doctrine\Common\Annotations\AnnotationRegistry;
+use BridgePayment\Model\Api\Transaction;
+use BridgePayment\Model\Api\User;
 use JsonSerializable;
 use Propel\Runtime\Exception\PropelException;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Thelia\Model\Order;
 use Thelia\Tools\URL;
 
-class PaymentLinkRequest
+class PaymentLinkRequest implements JsonSerializable
 {
-    /** @var User  */
+    /** @var User */
     public $user;
-    /** @var array  */
+    /** @var Transaction[] */
     public $transactions;
     /** @var string */
     public $clientReference;
@@ -24,21 +26,70 @@ class PaymentLinkRequest
 
     /**
      * @throws PropelException
+     * @return string => PaymentLinkRequest encoded in json
      */
-    public function hydrate(Order $order)
+    public function hydrate(Order $order): string
+    {
+
+        $this->user = $this->constructUserPaymentLinkRequest($order);
+        $this->transactions = [$this->constructTransactionPaymentLinkRequest($order)];
+
+        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
+        $this->clientReference = $order->getCustomer()->getRef();
+
+        return $this->jsonSerialize();
+    }
+
+    public function jsonSerialize(): string
+    {
+        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+
+        // User ignored attributes
+        $ignoredAttributes = [
+            'email',
+            'uuid',
+            'iban'
+        ];
+        if(!$this->user->getCompanyName()) {
+            $ignoredAttributes[] = 'companyName';
+        }
+        // Transaction ignored attributes
+        $ignoredAttributes[] = 'executionDate';
+        $ignoredAttributes[] = 'beneficiary';
+        $normalizer->setIgnoredAttributes($ignoredAttributes);
+
+        $encoder = new JsonEncoder();
+        $serializer = new Serializer([$normalizer], [$encoder]);
+
+        return $serializer->serialize($this, 'json');
+    }
+
+    /**
+     * @throws PropelException
+     */
+    protected function constructUserPaymentLinkRequest(Order $order): User
     {
         $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
         $customer = $order->getCustomer();
 
-        $this->user = new User();
-        $this->user
+        $user = new User();
+        $user
             ->setFirstName($invoiceAddress->getFirstname())
             ->setLastName($invoiceAddress->getLastname())
-            ->setReference($customer->getRef());
-        if(!$this->user->getFirstName() || !$this->user->getLastName()) {
-            $this->user->setCompanyName($invoiceAddress->getCompany());
+            ->setExternalReference($customer->getRef());
+
+        if($invoiceAddress->getCompany()) {
+            $user->setCompanyName($invoiceAddress->getCompany());
         }
 
+        return $user;
+    }
+
+    /**
+     * @throws PropelException
+     */
+    protected function constructTransactionPaymentLinkRequest(Order $order): Transaction
+    {
         $transaction = new Transaction();
         $transaction
             ->setLabel($order->getRef())
@@ -46,26 +97,6 @@ class PaymentLinkRequest
             ->setAmount(round($order->getTotalAmount(), 2))
             ->setEndToEndId($order->getRef());
 
-        $this->transactions = [$transaction];
-
-        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
-        $this->clientReference = $order->getCustomer()->getRef();
-
-        var_dump($this->user->jsonSerialize());
-//        var_dump($this->jsonSerialize());
-        die();
-        return json_encode($this->jsonSerialize());
+        return $transaction;
     }
-
-//    /**
-//     * @return mixed
-//     */
-//    public function jsonSerialize()
-//    {
-//        AnnotationRegistry::registerAutoloadNamespace('BridgePayment\Request');
-//        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-//        $serializer = new Serializer([$normalizer]);
-//
-//        return $serializer->normalize($this);
-//    }
 }

@@ -29,7 +29,7 @@ class FrontController extends BaseFrontController
      * methods : "GET")
      * @return Response|RedirectResponse
      */
-    public function paymentCallback( int $orderId ): Response
+    public function paymentCallback( int $orderId )
     {
         try {
             /** @var Request $request */

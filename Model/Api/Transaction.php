@@ -1,7 +1,6 @@
 <?php
 
-namespace BridgePayment\Request;
-use Symfony\Component\Cache\Adapter\TraceableAdapter;
+namespace BridgePayment\Model\Api;
 
 class Transaction
 {

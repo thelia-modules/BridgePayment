@@ -16,7 +16,7 @@ class BridgeApi
     public function apiCall(
         string $method,
         string $uri,
-        $data
+        string $data
     ): ResponseInterface
     {
 //        BridgePayment::setConfigValue('client_id', "9013e9c76c8e4a588bec1deb9eea7cea");
@@ -32,7 +32,7 @@ class BridgeApi
                 'Client-Id' => $clientId,
                 'Client-Secret' => $clientSecret
             ],
-            'json' => $data
+            'body' => $data
         ]);
     }
 }
