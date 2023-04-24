@@ -4,7 +4,6 @@ namespace BridgePayment;
 
 use BridgePayment\Exception\BridgePaymentLinkException;
 use BridgePayment\Service\PaymentLink;
-use BridgePayment\Service\Provider\SerializerAnnotationsServiceProvider;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Connection\ConnectionInterface;
@@ -38,7 +37,6 @@ class BridgePayment extends AbstractPaymentModule
 
             self::setConfigValue('is_initialized', true);
         }
-        (new Service\Provider\SerializerAnnotationsServiceProvider)->register();
         $statuses = [
             [
                 'code' => 'payment_rejected',
