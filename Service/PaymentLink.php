@@ -13,6 +13,8 @@ use BridgePayment\Response\PaymentLinkErrorResponse;
 use BridgePayment\Response\PaymentLinkResponse;
 use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Exception\PropelException;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Thelia\Core\Translation\Translator;
@@ -43,7 +45,7 @@ class PaymentLink
     public function __construct(BridgeApi $apiService)
     {
         $this->apiService = $apiService;
-        $this->serializer = new Serializer();
+        $this->serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
     }
 
     /**

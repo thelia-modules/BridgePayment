@@ -10,8 +10,6 @@ class PaymentLinkResponse
     public $url;
     /** @var string  */
     public $status;
-    /** @var string  */
+    /** @var ?string  */
     public $expiredAt;
-    /** @var string  */
-    public $expired_at;
 }

@@ -4,16 +4,25 @@ namespace BridgePayment\Model\Notification;
 
 class NotificationContent
 {
-    public string $paymentTransactionId;
-    public ?string $paymentLinkId = null;
-    public string $paymentRequestId;
-    public string $endToEndId;
-    public string $clientReference;
-    public ?string $status = null;
-    public ?string $statusReason = null;
+    /** @var string */
+    public $paymentTransactionId;
+    /** @var string|null */
+    public $paymentLinkId;
+    /** @var string */
+    public $paymentRequestId;
+    /** @var string */
+    public $endToEndId;
+    /** @var string */
+    public $clientReference;
+    /** @var string|null */
+    public $status = null;
+    /** @var string|null */
+    public $statusReason = null;
 
-    private ?string $paymentLinkStatus;
-    private ?string $paymentLinkClientReference;
+    /** @var string|null */
+    private $paymentLinkStatus;
+    /** @var string|null */
+    private $paymentLinkClientReference;
 
     public function setPaymentLinkClientReference(?string $paymentLinkClientReference): NotificationContent
     {
