@@ -8,9 +8,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 class SerializerAnnotationsServiceProvider
 {
-    public function register(): void
+    public static function register(): void
     {
         AnnotationRegistry::loadAnnotationClass(Discriminator::class);
-        AnnotationRegistry::loadAnnotationClass(Groups::class);
+
     }
 }
