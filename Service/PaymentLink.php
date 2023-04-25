@@ -14,6 +14,7 @@ use BridgePayment\Response\PaymentLinkResponse;
 use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -45,7 +46,7 @@ class PaymentLink
     public function __construct(BridgeApi $apiService)
     {
         $this->apiService = $apiService;
-        $this->serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+        $this->serializer = new Serializer([new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())], [new JsonEncoder()]);
     }
 
     /**
@@ -53,10 +54,11 @@ class PaymentLink
      */
     public function createPaymentLink(Order $order)
     {
+        $paymentLinkRequest = (new PaymentLinkRequest())->hydrate($order);
         $response = $this->apiService->apiCall(
             'POST',
             BridgePayment::BRIDGE_API_URL . '/v2/payment-links',
-            (new PaymentLinkRequest())->hydrate($order)
+            $paymentLinkRequest->jsonSerialize()
         );
 
         if ($response->getStatusCode() >= 400) {
@@ -75,6 +77,7 @@ class PaymentLink
         );
 
         (new BridgePaymentLink())
+            ->setExpiredAt($paymentLinkRequest->expiredDate)
             ->setUuid($paymentLinkResponse->id)
             ->setStatus('VALID')
             ->setLink($paymentLinkResponse->url)
@@ -142,7 +145,7 @@ class PaymentLink
         $response = $this->apiService->apiCall(
             'GET',
             BridgePayment::BRIDGE_API_URL . "/v2/payment-links/$paymentLinkUuid",
-            []
+            ''
         );
 
         if ($response->getStatusCode() >= 400) {
@@ -151,7 +154,7 @@ class PaymentLink
             );
         }
 
-        return (PaymentLinkErrorResponse::class)($this->serializer->deserialize(
+        return (PaymentLinkResponse::class)($this->serializer->deserialize(
             $response->getBody()->getContents(),
             PaymentLinkResponse::class,
             'json'

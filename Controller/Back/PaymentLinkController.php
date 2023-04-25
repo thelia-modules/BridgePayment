@@ -52,7 +52,7 @@ class PaymentLinkController extends BaseAdminController
 
             $paymentLinkResponse = $paymentLinkservice->refreshLink($paymentLinkUuid);
 
-            $expireAt = new DateTime($paymentLinkResponse->expired_at);
+            $expireAt = new DateTime($paymentLinkResponse->expiredAt);
 
             $paymentLink->setStatus($paymentLinkResponse->status)
                 ->setExpiredAt($expireAt)

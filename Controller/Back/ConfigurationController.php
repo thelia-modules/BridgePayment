@@ -36,8 +36,6 @@ class ConfigurationController extends BaseAdminController
      */
     public function configure(): Response
     {
-        /** @var Request $request */
-        $request = $this->getRequest();
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'BridgePayment', AccessManager::UPDATE)) {
             return $response;
         }
