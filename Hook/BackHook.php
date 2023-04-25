@@ -30,7 +30,7 @@ class BackHook extends BaseHook
     public function onPaymentModuleBottom(HookRenderEvent $event): void
     {
         $arguments = $event->getArguments();
-        if (BridgePayment::getModuleId() == $arguments['module_id'] ?? null) {
+        if (BridgePayment::getModuleId() === $arguments['module_id'] ?? null) {
             $event->add($this->render("payment-module-bottom.html"));
         }
     }
