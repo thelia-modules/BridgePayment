@@ -4,6 +4,9 @@ namespace BridgePayment\Request;
 
 use BridgePayment\Model\Api\Transaction;
 use BridgePayment\Model\Api\User;
+use DateInterval;
+use DateTimeImmutable;
+use Exception;
 use JsonSerializable;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -17,27 +20,31 @@ class PaymentLinkRequest implements JsonSerializable
 {
     /** @var User */
     public $user;
-    /** @var Transaction[] */
-    public $transactions;
+    /** @var string */
+    public $expiredDate;
     /** @var string */
     public $clientReference;
+    /** @var Transaction[] */
+    public $transactions;
     /** @var string */
     public $callbackUrl;
 
     /**
-     * @throws PropelException
-     * @return string => PaymentLinkRequest encoded in json
+     * @throws PropelException|Exception
      */
-    public function hydrate(Order $order): string
+    public function hydrate(Order $order): PaymentLinkRequest
     {
-
         $this->user = $this->constructUserPaymentLinkRequest($order);
-        $this->transactions = [$this->constructTransactionPaymentLinkRequest($order)];
 
-        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
+        $orderCreatedAt = new DateTimeImmutable($order->getCreatedAt()->format('Y-M-d H:i:s'));
+        $interval = DateInterval::createFromDateString('1 day');
+        $this->expiredDate = $orderCreatedAt->add($interval)->format('Y-m-d\\TH:i:s.O');
+
         $this->clientReference = $order->getCustomer()->getRef();
+        $this->transactions = [$this->constructTransactionPaymentLinkRequest($order)];
+        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
 
-        return $this->jsonSerialize();
+        return $this;
     }
 
     public function jsonSerialize(): string
