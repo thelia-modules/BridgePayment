@@ -80,6 +80,7 @@ class PaymentLink
             ->setExpiredAt($paymentLinkRequest->expiredDate)
             ->setUuid($paymentLinkResponse->id)
             ->setStatus('VALID')
+            ->setAmount($paymentLinkRequest->transactions[0]->getAmount())
             ->setLink($paymentLinkResponse->url)
             ->setOrderId($order->getId())
             ->save();
@@ -92,6 +93,7 @@ class PaymentLink
      */
     public function paymentLinkUpdate(NotificationContent $notification): void
     {
+        // TODO : Refacto méthode -> ne reçoit pas le statut du link mais celui de la transaction !!
         $paymentLink = BridgePaymentLinkQuery::create()
             ->useOrderQuery()
             ->useCustomerQuery()
@@ -114,12 +116,12 @@ class PaymentLink
      * @throws Exception
      * @throws GuzzleException
      */
-    public function revokeLink(string $paymentLinkUuid): PaymentLinkResponse
+    public function revokeLink(string $paymentLinkUuid): bool
     {
         $response = $this->apiService->apiCall(
             'POST',
             BridgePayment::BRIDGE_API_URL . "/v2/payment-links/$paymentLinkUuid/revoke",
-            []
+            ""
         );
 
         if ($response->getStatusCode() >= 400) {
@@ -128,13 +130,7 @@ class PaymentLink
             );
         }
 
-        $paymentLinkResponse = $this->serializer->deserialize(
-            $response->getBody(),
-            PaymentLinkResponse::class,
-            'json'
-        );
-
-        return (PaymentLinkErrorResponse::class)($paymentLinkResponse);
+        return true;
     }
 
     /**
