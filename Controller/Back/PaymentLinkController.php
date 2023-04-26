@@ -20,14 +20,21 @@ class PaymentLinkController extends BaseAdminController
 {
     /**
      * route : "/revoke/{paymentLinkUuid}"
-     * name : "_view", methods="GET")
+     * name : "_revoke", methods="GET")
      */
-    public function revokeLink(string $paymentLinkUuid): JsonResponse
+    public function revokeLink(string $paymentLinkUuid)
     {
         try {
             $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
-            $paymentLinkservice->revokeLink($paymentLinkUuid);
-            return new JsonResponse([]);
+            if($paymentLinkservice->revokeLink($paymentLinkUuid)){
+                $this->refreshLink($paymentLinkUuid);
+            }
+
+            $paymentLink = BridgePaymentLinkQuery::create()
+                ->filterByUuid($paymentLinkUuid)
+                ->findOne();
+
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/order/update/' . $paymentLink->getOrderId()));
         } catch (Exception|GuzzleException $ex) {
             return new JsonResponse(["error" => $ex->getMessage()], 400);
         }
@@ -35,7 +42,7 @@ class PaymentLinkController extends BaseAdminController
 
     /**
      * route : "/refresh/{paymentLinkUuid}"
-     * name : "_view", methods="GET")
+     * name : "_refresh", methods="GET")
      * @return Response|JsonResponse|RedirectResponse
      */
     public function refreshLink(string $paymentLinkUuid)
