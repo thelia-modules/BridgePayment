@@ -154,10 +154,10 @@ class PaymentLink
             );
         }
 
-        return (PaymentLinkResponse::class)($this->serializer->deserialize(
+        return $this->serializer->deserialize(
             $response->getBody()->getContents(),
             PaymentLinkResponse::class,
             'json'
-        ));
+        );
     }
 }

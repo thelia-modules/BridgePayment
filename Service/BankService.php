@@ -3,6 +3,7 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\BridgePayment;
+use Doctrine\Common\Cache\FilesystemCache;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Thelia\Core\Translation\Translator;
@@ -22,20 +23,34 @@ class BankService
      */
     public function getBanks(string $countryCode): array
     {
-        $response = $this->apiService->apiCall(
-            'GET',
-            BridgePayment::BRIDGE_API_URL . '/v2/banks?countries=' . $countryCode . '&capabilities=single_payment&limit=500',
-            ""
-        );
+        $cacheDriver = new FilesystemCache(THELIA_CACHE_DIR . 'bridge');
 
-        if ($response->getStatusCode() >= 400) {
-            throw new Exception(
-                Translator::getInstance()->trans('Banks not found.', [], BridgePayment::DOMAIN_NAME)
+        if (null !== $bankList = $cacheDriver->fetch('banks')) {
+            $response = $this->apiService->apiCall(
+                'GET',
+                BridgePayment::BRIDGE_API_URL . '/v2/banks?countries=' . $countryCode . '&capabilities=single_payment&limit=500',
+                ""
             );
+
+            if ($response->getStatusCode() >= 400) {
+                throw new Exception(
+                    Translator::getInstance()->trans('Banks not found.', [], BridgePayment::DOMAIN_NAME)
+                );
+            }
+
+            $banksResponse = json_decode($response->getBody()->getContents(), true);
+
+            if (empty($banksResponse['resources'])) {
+                throw new Exception(
+                    Translator::getInstance()->trans('No banks not found.', [], BridgePayment::DOMAIN_NAME)
+                );
+            }
+
+            $bankList = serialize($banksResponse['resources']);
+
+            $cacheDriver->save('banks', $bankList, 86400);
         }
 
-        $banksResponse = json_decode($response->getBody()->getContents(), true);
-
-        return $banksResponse['resources'] ?? [];
+        return unserialize($bankList);
     }
 }
