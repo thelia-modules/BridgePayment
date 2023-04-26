@@ -3,7 +3,10 @@
 namespace BridgePayment\Controller\Front;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Controller\Back\PaymentLinkController;
+use BridgePayment\Model\BridgePaymentLink;
 use BridgePayment\Model\BridgePaymentLinkQuery;
+use DateTime;
 use Exception;
 use Front\Front;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -63,6 +66,20 @@ class FrontController extends BaseFrontController
             $paymentLinkId = $request->get('payment_link_id');
             $status = $request->get('status');
 
+            $paymentLink = BridgePaymentLinkQuery::create()
+                ->filterByUuid($paymentLinkId)
+                ->filterByStatus('VALID')
+                ->findOne();
+
+            if(null !== $paymentLink) {
+                $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
+                $paymentLinkResponse = $paymentLinkservice->refreshLink($paymentLinkId);
+                $expireAt = new DateTime($paymentLinkResponse->expiredAt);
+                $paymentLink->setStatus($paymentLinkResponse->status)
+                    ->setExpiredAt($expireAt)
+                    ->save();
+            }
+
             if ($status === 'error') {
                 throw new Exception(
                     Translator::getInstance()->trans(
@@ -72,11 +89,6 @@ class FrontController extends BaseFrontController
                     )
                 );
             }
-
-            $paymentLink = BridgePaymentLinkQuery::create()
-                ->filterByUuid($paymentLinkId)
-                ->filterByStatus('VALID')
-                ->findOne();
 
             if ($status === 'abort') {
                 if (!$paymentLink) {
