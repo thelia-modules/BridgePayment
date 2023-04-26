@@ -53,9 +53,9 @@
                         </div>
                     </div>
                     <div class="row" id="contentBanks" style="display:flex;flex-wrap:wrap;margin-top: 20px;">
-                        {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
+                        {loop type="bank_list" name="bank_list" limit=12}
                             <div class="col-lg-3">
-                                <a href="#" class="bank" data-id="{$BANK_ID}">
+                                <a href="#" class="bank">
                                     <figure>
                                         <img src="{$BANK_LOGO}">
                                     </figure>
