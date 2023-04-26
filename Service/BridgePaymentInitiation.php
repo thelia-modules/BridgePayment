@@ -49,7 +49,7 @@ class BridgePaymentInitiation
         $response = $this->apiService->apiCall(
             'POST',
             BridgePayment::BRIDGE_API_URL . '/v2/payment-requests',
-            $data
+            json_encode($data)
         );
 
         if ($response->getStatusCode() >= 400) {
