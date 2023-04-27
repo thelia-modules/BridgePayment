@@ -2,11 +2,12 @@
 
 namespace BridgePayment\Event;
 
+use Symfony\Component\EventDispatcher\Event;
 use Thelia\Model\Country;
 
-class BridgeBankEvent
+class BridgeBankEvent extends Event
 {
-    const GET_BANKS_EVENT = "brigepayment.event.get_banks";
+    public const GET_BANKS_EVENT = "brigepayment.event.get_banks";
 
     protected $banks;
 
@@ -25,9 +26,8 @@ class BridgeBankEvent
 
     /**
      * @param mixed $banks
-     * @return BridgeBankEvent
      */
-    public function setBanks($banks)
+    public function setBanks($banks): BridgeBankEvent
     {
         $this->banks = $banks;
         return $this;
@@ -43,9 +43,8 @@ class BridgeBankEvent
 
     /**
      * @param mixed $error
-     * @return BridgeBankEvent
      */
-    public function setError($error)
+    public function setError($error): BridgeBankEvent
     {
         $this->error = $error;
         return $this;
@@ -54,16 +53,15 @@ class BridgeBankEvent
     /**
      * @return mixed
      */
-    public function getCountry()
+    public function getCountry(): Country
     {
         return $this->country;
     }
 
     /**
      * @param mixed $country
-     * @return BridgeBankEvent
      */
-    public function setCountry($country)
+    public function setCountry($country): BridgeBankEvent
     {
         $this->country = $country;
         return $this;

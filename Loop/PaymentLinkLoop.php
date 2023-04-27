@@ -5,8 +5,8 @@ namespace BridgePayment\Loop;
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\Base\BridgePaymentLinkQuery;
 use BridgePayment\Model\BridgePaymentLink;
-use BridgePayment\Model\Map\BridgePaymentLinkTableMap;
 use BridgePayment\Service\PaymentLink;
+use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
@@ -15,26 +15,30 @@ use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Core\Translation\Translator;
 
+/**
+ * @method getOrderId()
+ */
 class PaymentLinkLoop extends BaseLoop implements PropelSearchLoopInterface
 {
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
-            Argument::createIntTypeArgument('order_id'),
+            Argument::createIntTypeArgument('order_id')
         );
     }
 
     public function buildModelCriteria()
     {
-        $query = BridgePaymentLinkQuery::create()
+        return BridgePaymentLinkQuery::create()
             ->useOrderQuery()
             ->filterById($this->getOrderId())
             ->endUse();
-
-        return $query;
     }
 
-    public function parseResults(LoopResult $loopResult)
+    /**
+     * @throws PropelException
+     */
+    public function parseResults(LoopResult $loopResult): LoopResult
     {
         /** @var BridgePaymentLink $paymentLink */
         foreach ($loopResult->getResultDataCollection() as $paymentLink) {
@@ -46,9 +50,9 @@ class PaymentLinkLoop extends BaseLoop implements PropelSearchLoopInterface
             $loopResultRow
                 ->set('PAYMENT_LINK_ID', $paymentLink->getId())
                 ->set('PAYMENT_LINK_UUID', $paymentLink->getUuid())
-                ->set('PAYMENT_LINK_EXPIRED_AT', $paymentLink->getExpiredAt()?->format('d/m/Y H:m:s'))
-                ->set('PAYMENT_LINK_CREATED_AT', $paymentLink->getCreatedAt()?->format('d/m/Y H:m:s'))
-                ->set('PAYMENT_LINK_UPDATED_AT', $paymentLink->getUpdatedAt()?->format('d/m/Y H:m:s'))
+                ->set('PAYMENT_LINK_EXPIRED_AT', $paymentLink->getExpiredAt()->format('d/m/Y H:m:s'))
+                ->set('PAYMENT_LINK_CREATED_AT', $paymentLink->getCreatedAt()->format('d/m/Y H:m:s'))
+                ->set('PAYMENT_LINK_UPDATED_AT', $paymentLink->getUpdatedAt()->format('d/m/Y H:m:s'))
                 ->set('PAYMENT_LINK_STATUS_COLOR', $statusColor);
 
             if (!in_array($paymentLink->getStatus(), ['COMPLETED', 'EXPIRED'])) {

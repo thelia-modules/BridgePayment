@@ -3,38 +3,52 @@
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\Model\BridgePaymentLinkQuery;
-use BridgePayment\Service\PaymentLink;
+use DateTime;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Response;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/admin/module/BridgePayment/paymentlink", name="bridgepayment_paymentlink")
+ * route : "/admin/module/BridgePayment/paymentlink"
+ * name : "bridgepayment_paymentlink")
  */
 class PaymentLinkController extends BaseAdminController
 {
     /**
-     * @Route("/revoke/{paymentLinkUuid}", name="_view", methods="GET")
+     * route : "/revoke/{paymentLinkUuid}"
+     * name : "_revoke", methods="GET")
      */
-    public function revokeLink(PaymentLink $paymentLinkservice, string $paymentLinkUuid): JsonResponse
+    public function revokeLink(string $paymentLinkUuid)
     {
         try {
-            $paymentLinkservice->revokeLink($paymentLinkUuid);
-            return new JsonResponse([]);
-        } catch (Exception $ex) {
+            $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
+            if($paymentLinkservice->revokeLink($paymentLinkUuid)){
+                $this->refreshLink($paymentLinkUuid);
+            }
+
+            $paymentLink = BridgePaymentLinkQuery::create()
+                ->filterByUuid($paymentLinkUuid)
+                ->findOne();
+
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/order/update/' . $paymentLink->getOrderId()));
+        } catch (Exception|GuzzleException $ex) {
             return new JsonResponse(["error" => $ex->getMessage()], 400);
         }
     }
 
     /**
-     * @Route("/refresh/{paymentLinkUuid}", name="_view", methods="GET")
+     * route : "/refresh/{paymentLinkUuid}"
+     * name : "_refresh", methods="GET")
+     * @return Response|JsonResponse|RedirectResponse
      */
-    public function refreshLink(PaymentLink $paymentLinkservice, string $paymentLinkUuid)
+    public function refreshLink(string $paymentLinkUuid)
     {
         try {
+            $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
             $paymentLink = BridgePaymentLinkQuery::create()
                 ->filterByUuid($paymentLinkUuid)
                 ->findOne();
@@ -45,14 +59,14 @@ class PaymentLinkController extends BaseAdminController
 
             $paymentLinkResponse = $paymentLinkservice->refreshLink($paymentLinkUuid);
 
-            $expireAt = new \DateTime($paymentLinkResponse->expired_at);
+            $expireAt = new DateTime($paymentLinkResponse->expiredAt);
 
             $paymentLink->setStatus($paymentLinkResponse->status)
                 ->setExpiredAt($expireAt)
                 ->save();
 
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/order/update/' . $paymentLink->getOrderId()));
-        } catch (Exception $ex) {
+        } catch (Exception|GuzzleException $ex) {
             return new JsonResponse(["error" => $ex->getMessage()], 400);
         }
     }

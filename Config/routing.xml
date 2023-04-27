@@ -3,4 +3,48 @@
 <routes xmlns="http://symfony.com/schema/routing"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <!-- Back -->
+    <route id="bridgepayment_configure_save" path="/admin/module/BridgePayment/configure" methods="POST">
+        <default key="_controller">BridgePayment\Controller\Back\ConfigurationController::configure</default>
+    </route>
+    <route id="bridgepayment_configure_view" path="/admin/module/BridgePayment" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\ConfigurationController::view</default>
+    </route>
+
+    <route id="bridgepayment_paymentlink_revoke"
+           path="/admin/module/BridgePayment/paymentlink/revoke/{paymentLinkUuid}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\PaymentLinkController::revokeLink</default>
+    </route>
+    <route id="bridgepayment_paymentlink_refresh"
+           path="/admin/module/BridgePayment/paymentlink/refresh/{paymentLinkUuid}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\PaymentLinkController::refreshLink</default>
+    </route>
+
+    <route id="bridgepayment_refund" path="/admin/module/bridgepayment/refund" methods="POST">
+        <default key="_controller">BridgePayment\Controller\Back\RefundController::refund</default>
+    </route>
+    <route id="bridgepayment_refund_success" path="/admin/module/bridgepayment/refund/success/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\RefundController::refundSuccess</default>
+    </route>
+    <route id="bridgepayment_refund_failed" path="/admin/module/bridgepayment/refund/failed/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\RefundController::refundFailure</default>
+    </route>
+
+    <!-- Front -->
+    <route id="bridgepayment_order_cancel" path="/bridge/payment/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Front\FrontController::paymentCallback</default>
+    </route>
+    <route id="bridgepayment_bank_search_order_cancel" path="/bridge/bank/search/{orderId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Front\FrontController::searchBank</default>
+    </route>
+
+    <route id="bridgepayment_create_payment" path="/bridge/create-payment" methods="POST">
+        <default key="_controller">BridgePayment\Controller\Front\PaymentController::createPayment</default>
+    </route>
+
+    <route id="bridgepayment_notification" path="/bridge/notification" methods="POST">
+        <default key="_controller">BridgePayment\Controller\Front\WebHookController::notification</default>
+    </route>
+
 </routes>

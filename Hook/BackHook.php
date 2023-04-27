@@ -22,15 +22,15 @@ class BackHook extends BaseHook
         ];
     }
 
-    public function onModuleConfiguration(HookRenderEvent $event)
+    public function onModuleConfiguration(HookRenderEvent $event): void
     {
-
+        $event->add($this->render("module-configuration.html"));
     }
 
-    public function onPaymentModuleBottom(HookRenderEvent $event)
+    public function onPaymentModuleBottom(HookRenderEvent $event): void
     {
         $arguments = $event->getArguments();
-        if (BridgePayment::getModuleId() == $arguments['module_id'] ?? null) {
+        if (BridgePayment::getModuleId() === $arguments['module_id'] ?? null) {
             $event->add($this->render("payment-module-bottom.html"));
         }
     }

@@ -2,23 +2,27 @@
 
 namespace BridgePayment\Service;
 
-use Exception;
 use BridgePayment\BridgePayment;
+use Exception;
+use GuzzleHttp\Exception\GuzzleException;
+use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Translation\Translator;
-use Thelia\Log\Tlog;
-use Thelia\Model\ConfigQuery;
 use Thelia\Model\Order;
 use Thelia\Tools\URL;
 
 class BridgePaymentInitiation
 {
-    public function __construct(
-        protected BridgeApi $apiService,
-        protected BridgeApiService $bridgeApiService
-    )
+    /** @var BridgeApi  */
+    protected $apiService;
+
+    public function __construct( BridgeApi $apiService )
     {
+        $this->apiService = $apiService;
     }
 
+    /**
+     * @throws PropelException| Exception| GuzzleException
+     */
     public function createPaymentRequest(Order $order, $bankId): string
     {
         $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
@@ -45,7 +49,7 @@ class BridgePaymentInitiation
         $response = $this->apiService->apiCall(
             'POST',
             BridgePayment::BRIDGE_API_URL . '/v2/payment-requests',
-            $data
+            json_encode($data)
         );
 
         if ($response->getStatusCode() >= 400) {
@@ -54,7 +58,7 @@ class BridgePaymentInitiation
             );
         }
 
-        $paymentInitiationResponse = json_decode($response->getContent(), true);
+        $paymentInitiationResponse = json_decode($response->getBody()->getContents(), true);
 
         return $paymentInitiationResponse['consent_url'];
     }

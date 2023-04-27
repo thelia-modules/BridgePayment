@@ -4,7 +4,10 @@ namespace BridgePayment\Model\Notification;
 
 class Notification
 {
-    public NotificationContent $content;
-    public int $timestamp;
-    public string $type;
+    /** @var NotificationContent */
+    public $content;
+    /** @var int */
+    public $timestamp;
+    /** @var string */
+    public $type;
 }

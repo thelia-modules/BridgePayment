@@ -2,18 +2,16 @@
 
 namespace BridgePayment\Controller\Front;
 
+use BridgePayment\BridgePayment;
+use BridgePayment\Controller\Back\PaymentLinkController;
+use BridgePayment\Model\BridgePaymentLink;
+use BridgePayment\Model\BridgePaymentLinkQuery;
+use DateTime;
 use Exception;
 use Front\Front;
-use BridgePayment\BridgePayment;
-use BridgePayment\Model\BridgePaymentLinkQuery;
-use BridgePayment\Model\BridgePaymentTransactionQuery;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
-use Thelia\Core\Security\SecurityContext;
-use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Exception\TheliaProcessException;
 use Thelia\Log\Tlog;
@@ -21,21 +19,22 @@ use Thelia\Model\OrderQuery;
 use Thelia\Tools\URL;
 
 /**
- * @Route("/bridge", name="bridgepayment_order")
+ * route : "/bridge"
+ * name : "bridgepayment_order")
  */
 class FrontController extends BaseFrontController
 {
     /**
-     * @Route("/payment/{orderId}", name="bridgepayment_order_cancel", methods="GET")
+     * route : "/payment/{orderId}"
+     * name : "bridgepayment_order_cancel"
+     * methods : "GET")
+     * @return Response|RedirectResponse
      */
-    public function paymentCallback(
-        Request         $request,
-        SecurityContext $securityContext,
-        ParserContext   $parserContext,
-        int             $orderId
-    ): Response|RedirectResponse
+    public function paymentCallback( int $orderId )
     {
         try {
+            $request = $this->getRequest();
+
             if (!$cancelOrder = OrderQuery::create()->findPk($orderId)) {
                 Tlog::getInstance()->warning("Failed order ID '$orderId' not found.");
 
@@ -50,7 +49,7 @@ class FrontController extends BaseFrontController
                 );
             }
 
-            $customer = $securityContext->getCustomerUser();
+            $customer = $this->getSecurityContext()->getCustomerUser();
 
             if (null === $customer || $cancelOrder->getCustomerId() !== $customer->getId()) {
                 throw new TheliaProcessException(
@@ -65,9 +64,21 @@ class FrontController extends BaseFrontController
             }
 
             $paymentLinkId = $request->get('payment_link_id');
-            $paymentRequestId = $request->get('payment_request_id');
-            $customerRef = $request->get('client_reference');
             $status = $request->get('status');
+
+            $paymentLink = BridgePaymentLinkQuery::create()
+                ->filterByUuid($paymentLinkId)
+                ->filterByStatus('VALID')
+                ->findOne();
+
+            if(null !== $paymentLink) {
+                $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
+                $paymentLinkResponse = $paymentLinkservice->refreshLink($paymentLinkId);
+                $expireAt = new DateTime($paymentLinkResponse->expiredAt);
+                $paymentLink->setStatus($paymentLinkResponse->status)
+                    ->setExpiredAt($expireAt)
+                    ->save();
+            }
 
             if ($status === 'error') {
                 throw new Exception(
@@ -79,17 +90,7 @@ class FrontController extends BaseFrontController
                 );
             }
 
-            if ($status === 'abort' && $customerRef && $paymentLinkId) {
-                $paymentLink = BridgePaymentLinkQuery::create()
-                    ->useOrderQuery()
-                    ->useCustomerQuery()
-                    ->filterByRef($customerRef)
-                    ->endUse()
-                    ->endUse()
-                    ->filterByUuid($paymentLinkId)
-                    ->filterByStatus('VALID')
-                    ->findOne();
-
+            if ($status === 'abort') {
                 if (!$paymentLink) {
                     throw new Exception(
                         Translator::getInstance()->trans(
@@ -100,8 +101,7 @@ class FrontController extends BaseFrontController
                     );
                 }
 
-                $parserContext->set('payment_link_url', $paymentLink->getLink());
-
+                $this->getParserContext()->set('payment_link_url', $paymentLink->getLink());
                 return $this->render('callback');
             }
 
@@ -114,11 +114,6 @@ class FrontController extends BaseFrontController
                     )
                 );
             }
-
-            $paymentLink = BridgePaymentTransactionQuery::create()
-                ->filterByPaymentLinkId($paymentLinkId)
-                ->filterByPaymentRequestId($paymentRequestId)
-                ->findOne();
 
             if (!$paymentLink) {
                 throw new Exception(
@@ -149,12 +144,16 @@ class FrontController extends BaseFrontController
     }
 
     /**
-     * @Route("/bank/search/{orderId}", name="bridgepayment_bank_search_order_cancel", methods="GET")
+     * route : "/bank/search/{orderId}"
+     * name : "bridgepayment_bank_search_order_cancel"
+     * methods : "GET")
      */
-    public function searchBank(Request $request, int $orderId)
+    public function searchBank(int $orderId) : Response
     {
-        $order = OrderQuery::create()->findPk($orderId);
+        $request = $this->getRequest();
         $search = $request->get('search');
+
+        $order = OrderQuery::create()->findPk($orderId);
 
         if (!$order) {
             return $this->pageNotFound();
