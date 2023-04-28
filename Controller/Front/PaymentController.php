@@ -2,71 +2,41 @@
 
 namespace BridgePayment\Controller\Front;
 
-use BridgePayment\BridgePayment;
 use BridgePayment\Service\BridgePaymentInitiation;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Thelia\Controller\Front\BaseFrontController;
-use Thelia\Core\Translation\Translator;
-use Thelia\Model\OrderQuery;
+use Thelia\Model\Base\OrderQuery;
 use Thelia\Tools\URL;
 
 /**
  * route : "/bridge/create-payment"
  * name : "bridgepayment_create_payment")
+ * @method static getConfigValue(string $string, false $false)
  */
 class PaymentController extends BaseFrontController
 {
-    /**
-     * route : ""
-     * name : ""
-     * methods : "POST")
-     */
-    public function createPayment(): RedirectResponse
+    public function createPayment($order_id, $bank_id): RedirectResponse
     {
         try {
-            /** @var Request $request */
-            $request = $this->getRequest();
+            /** @var BridgePaymentInitiation $paymentInitiationService */
+            $paymentInitiationService = $this->getContainer()->get('bridgepayment.bridge.payment.initiation');
 
-            /** @var BridgePaymentInitiation $bridgePaymentInitiationService */
-            $bridgePaymentInitiationService = $this->getContainer()->get('bridgepayment.bridge.payment.initiation');
+            if(empty($order_id)) {
+                $order_id = $this->getRequest()->get('order_id');
+            }
+            $order = OrderQuery::create()->findPk($order_id);
 
-            $orderId = $request->get('order_id');
-            $bankId = $request->get('bank_id');
-
-            if (!$orderId || !$bankId) {
-                throw new Exception(
-                    Translator::getInstance()->trans('Payment request error.',
-                        [],
-                        BridgePayment::DOMAIN_NAME)
-                );
+            if(empty($bank_id)) {
+                $bank_id = $this->getRequest()->get('bank_id');
             }
 
-            $order = OrderQuery::create()->findPk($orderId);
-
-            if (!$order) {
-                throw new Exception(
-                    Translator::getInstance()->trans('Payment request error.',
-                        [],
-                        BridgePayment::DOMAIN_NAME)
-                );
-            }
-
-            if ($order->getBridgePaymentTransactions()->getData()) {
-                throw new Exception(
-                    Translator::getInstance()->trans('Payment request closed.',
-                        [],
-                        BridgePayment::DOMAIN_NAME)
-                );
-            }
-
-            return new RedirectResponse($bridgePaymentInitiationService->createPaymentRequest($order, $bankId));
+            return new RedirectResponse($paymentInitiationService->createPaymentRequest($order, $bank_id));
 
         } catch (Exception|GuzzleException $ex) {
             $message = $ex->getMessage();
-            return new RedirectResponse(URL::getInstance()->absoluteUrl("/order/failed/$orderId/$message"));
+            return new RedirectResponse(URL::getInstance()->absoluteUrl("/order/failed/$order_id/$message"));
         }
     }
 }
