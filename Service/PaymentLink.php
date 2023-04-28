@@ -17,7 +17,6 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\Order;
 
@@ -40,8 +39,8 @@ class PaymentLink
     ];
     /** @var BridgeApi */
     protected $apiService;
-    /** @var SerializerInterface */
-    protected $serializer;
+    /** @var Serializer */
+    public $serializer;
 
     public function __construct(BridgeApi $apiService)
     {
@@ -64,9 +63,9 @@ class PaymentLink
         if ($response->getStatusCode() >= 400) {
             throw new BridgePaymentLinkException(
                 (PaymentLinkErrorResponse::class)($this->serializer->deserialize(
-                $response->getReasonPhrase(),
-                PaymentLinkErrorResponse::class,
-                'json'
+                    $response->getBody()->getContents(),
+                    PaymentLinkErrorResponse::class,
+                    'json'
             )));
         }
 
@@ -146,7 +145,7 @@ class PaymentLink
 
         if ($response->getStatusCode() >= 400) {
             throw new Exception(
-                Translator::getInstance()->trans("Can't revoke link.", [], BridgePayment::DOMAIN_NAME)
+                Translator::getInstance()->trans("Can't refresh link.", [], BridgePayment::DOMAIN_NAME)
             );
         }
 
