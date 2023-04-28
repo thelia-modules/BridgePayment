@@ -67,8 +67,8 @@ class PaymentTransactionLoop extends BaseLoop implements PropelSearchLoopInterfa
                 ->set('PAYMENT_TRANSACTION_CREATED_AT', $paymentTransaction->getCreatedAt()->format('d/m/Y H:i:s'))
                 ->set('PAYMENT_TRANSACTION_UPDATE_AT', $paymentTransaction->getUpdatedAt()->format('d/m/Y H:i:s'));
 
-            if ($tatusReason = $paymentTransaction->getStatusReason()) {
-                $loopResultRow->set('PAYMENT_TRANSACTION_STATUS_REASON', Translator::getInstance()->trans($tatusReason, [], BridgePayment::DOMAIN_NAME));
+            if ($statusReason = $paymentTransaction->getStatusReason()) {
+                $loopResultRow->set('PAYMENT_TRANSACTION_STATUS_REASON', Translator::getInstance()->trans($statusReason, [], BridgePayment::DOMAIN_NAME));
             }
 
             if ($status = $paymentTransaction->getStatus()) {

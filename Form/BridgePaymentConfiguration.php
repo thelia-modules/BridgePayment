@@ -4,13 +4,13 @@ namespace BridgePayment\Form;
 
 use BridgePayment\BridgePayment;
 use BridgePayment\Event\BridgeBankEvent;
-use OpenApi\Constraint\NotBlank;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Thelia\Model\ConfigQuery;
