@@ -44,7 +44,16 @@ class BankLoop extends BaseLoop implements ArraySearchLoopInterface
 
         $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
 
-        return $bankService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
+        $allBanksInCountry = $bankService->getBanks($invoiceAddress->getCountry()->getIsoalpha2());
+        $banks = [];
+        foreach ($allBanksInCountry as $bank){
+            if(null === $bank['parent_name']){
+                $banks[$bank['name']][] = $bank;
+            } else {
+                $banks[$bank['parent_name']][] = $bank;
+            }
+        }
+        return $banks;
     }
 
     public function parseResults(LoopResult $loopResult): LoopResult

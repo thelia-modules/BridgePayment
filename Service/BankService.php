@@ -6,6 +6,9 @@ use BridgePayment\BridgePayment;
 use Doctrine\Common\Cache\FilesystemCache;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use OpenApi\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Thelia\Core\Translation\Translator;
 
 class BankService
@@ -21,7 +24,7 @@ class BankService
     /**
      * @throws Exception|GuzzleException
      */
-    public function getBanks(string $countryCode): array
+    public function getBanks(string $countryCode)
     {
         $cacheDriver = new FilesystemCache(THELIA_CACHE_DIR . 'bridge');
 
