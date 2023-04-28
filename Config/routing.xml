@@ -21,6 +21,11 @@
         <default key="_controller">BridgePayment\Controller\Back\PaymentLinkController::refreshLink</default>
     </route>
 
+    <route id="bridgepayment_payment_refresh"
+           path="/admin/module/BridgePayment/payment/refresh/{paymentRequestId}" methods="GET">
+        <default key="_controller">BridgePayment\Controller\Back\PaymentController::refreshTransaction</default>
+    </route>
+
     <route id="bridgepayment_refund" path="/admin/module/bridgepayment/refund" methods="POST">
         <default key="_controller">BridgePayment\Controller\Back\RefundController::refund</default>
     </route>

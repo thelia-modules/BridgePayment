@@ -49,6 +49,7 @@ class PaymentLinkController extends BaseAdminController
     {
         try {
             $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
+
             $paymentLink = BridgePaymentLinkQuery::create()
                 ->filterByUuid($paymentLinkUuid)
                 ->findOne();
@@ -61,7 +62,8 @@ class PaymentLinkController extends BaseAdminController
 
             $expireAt = new DateTime($paymentLinkResponse->expiredAt);
 
-            $paymentLink->setStatus($paymentLinkResponse->status)
+            $paymentLink
+                ->setStatus($paymentLinkResponse->status)
                 ->setExpiredAt($expireAt)
                 ->save();
 
