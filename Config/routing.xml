@@ -39,7 +39,7 @@
         <default key="_controller">BridgePayment\Controller\Front\FrontController::searchBank</default>
     </route>
 
-    <route id="bridgepayment_create_payment" path="/bridge/create-payment" methods="POST">
+    <route id="bridgepayment_create_payment" path="/bridge/create-payment/{order_id}/{bank_id}" methods="GET">
         <default key="_controller">BridgePayment\Controller\Front\PaymentController::createPayment</default>
     </route>
 

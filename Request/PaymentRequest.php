@@ -2,11 +2,9 @@
 
 namespace BridgePayment\Request;
 
+
 use BridgePayment\Model\Api\Transaction;
 use BridgePayment\Model\Api\User;
-use DateInterval;
-use DateTimeImmutable;
-use Exception;
 use JsonSerializable;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -16,33 +14,33 @@ use Symfony\Component\Serializer\Serializer;
 use Thelia\Model\Order;
 use Thelia\Tools\URL;
 
-class PaymentLinkRequest implements JsonSerializable
+class PaymentRequest implements JsonSerializable
 {
+    /** @var string */
+    public $successfulCallbackUrl;
+    /** @var string */
+    public $unsuccessfulCallbackUrl;
+    /** @var Transaction[] */
+    public $transactions;
     /** @var User */
     public $user;
     /** @var string */
-    public $expiredDate;
-    /** @var string */
     public $clientReference;
-    /** @var Transaction[] */
-    public $transactions;
-    /** @var string */
-    public $callbackUrl;
+    /** @var int */
+    public $bankId;
+
 
     /**
-     * @throws PropelException|Exception
+     * @throws PropelException
      */
-    public function hydrate(Order $order): PaymentLinkRequest
+    public function hydrate(Order $order, int $bankId): PaymentRequest
     {
-        $this->user = $this->constructUserPaymentLinkRequest($order);
-
-        $orderCreatedAt = new DateTimeImmutable($order->getCreatedAt()->format('Y-M-d H:i:s'));
-        $interval = DateInterval::createFromDateString('1 day');
-        $this->expiredDate = $orderCreatedAt->add($interval)->format('Y-m-d\\TH:i:s.O');
-
+        $this->successfulCallbackUrl = URL::getInstance()->absoluteUrl("/order/placed/" . $order->getId());
+        $this->unsuccessfulCallbackUrl = URL::getInstance()->absoluteUrl("/order/failed/" . $order->getId() . "/error");
+        $this->transactions = [$this->constructTransactionPaymentRequest($order)];
+        $this->user = $this->constructUserPaymentRequest($order);
         $this->clientReference = $order->getCustomer()->getRef();
-        $this->transactions = [$this->constructTransactionPaymentLinkRequest($order)];
-        $this->callbackUrl = URL::getInstance()->absoluteUrl("/bridge/payment/" . $order->getId());
+        $this->bankId = $bankId;
 
         return $this;
     }
@@ -50,7 +48,7 @@ class PaymentLinkRequest implements JsonSerializable
     /**
      * @throws PropelException
      */
-    protected function constructUserPaymentLinkRequest(Order $order): User
+    protected function constructUserPaymentRequest(Order $order): User
     {
         $invoiceAddress = $order->getOrderAddressRelatedByInvoiceOrderAddressId();
         $customer = $order->getCustomer();
@@ -71,14 +69,15 @@ class PaymentLinkRequest implements JsonSerializable
     /**
      * @throws PropelException
      */
-    protected function constructTransactionPaymentLinkRequest(Order $order): Transaction
+    protected function constructTransactionPaymentRequest(Order $order): Transaction
     {
         $transaction = new Transaction();
         $transaction
             ->setLabel($order->getRef())
             ->setCurrency($order->getCurrency()->getCode())
-            ->setAmount(round($order->getTotalAmount(), 2))
-            ->setEndToEndId($order->getRef());
+            ->setAmount(round($order->getTotalAmountLegacy(), 2))
+            ->setEndToEndId($order->getRef())
+            ->setClientReference($order->getCustomer()->getRef());
 
         return $transaction;
     }
@@ -96,7 +95,6 @@ class PaymentLinkRequest implements JsonSerializable
             $ignoredAttributes[] = 'companyName';
         }
         // Transaction ignored attributes
-        $ignoredAttributes[] = 'clientReference';
         $ignoredAttributes[] = 'executionDate';
         $ignoredAttributes[] = 'beneficiary';
         $normalizer->setIgnoredAttributes($ignoredAttributes);

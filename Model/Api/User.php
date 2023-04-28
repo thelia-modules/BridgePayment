@@ -15,8 +15,6 @@ class User
     /** @var string */
     protected $email;
     /** @var string */
-    protected $uuid;
-    /** @var string */
     protected $iban;
 
     public function getFirstName(): ?string
@@ -63,15 +61,6 @@ class User
     {
         $this->email = $email;
         return $this;
-    }
-    public function getUuid() : ?string
-    {
-       return $this->uuid;
-    }
-    public function setUuid(string $uuid): User
-    {
-       $this->uuid = $uuid;
-       return $this;
     }
     public function getIban() : ?string
     {

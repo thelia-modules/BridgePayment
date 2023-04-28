@@ -13,6 +13,8 @@ class Transaction
     /** @var string */
     private $endToEndId;
     /** @var string */
+    private $clientReference;
+    /** @var string */
     private $executionDate;
     /** @var User */
     private $beneficiary;
@@ -58,6 +60,17 @@ class Transaction
     public function setEndToEndId(string $endToEndId): Transaction
     {
         $this->endToEndId = $endToEndId;
+        return $this;
+    }
+
+    public function getClientReference(): string
+    {
+        return $this->clientReference;
+    }
+
+    public function setClientReference(string $clientReference): Transaction
+    {
+        $this->clientReference = $clientReference;
         return $this;
     }
 
