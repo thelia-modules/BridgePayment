@@ -2,6 +2,11 @@
 
 namespace BridgePayment\Service;
 
+use BridgePayment\Exception\BridgePaymentException;
+use BridgePayment\Model\Api\Transaction;
+use BridgePayment\Request\PaymentRequest;
+use BridgePayment\Response\PaymentErrorResponse;
+use BridgePayment\Response\PaymentResponse;
 use DateTime;
 use Exception;
 use BridgePayment\BridgePayment;
@@ -11,11 +16,12 @@ use BridgePayment\Model\Notification\NotificationContent;
 use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\Translation\Translator;
 use Thelia\Model\Order;
 use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
@@ -31,8 +37,8 @@ class PaymentTransaction
     ];
     /** @var BridgeApi */
     protected $apiService;
-    /** @var SerializerInterface */
-    protected $serializer;
+    /** @var Serializer */
+    public $serializer;
     /** @var EventDispatcherInterface */
     protected $dispatcher;
 
@@ -42,7 +48,7 @@ class PaymentTransaction
     )
     {
         $this->dispatcher = $dispatcher;
-        $this->serializer = new Serializer();
+        $this->serializer = new Serializer([new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())], [new JsonEncoder()]);
         $this->apiService = $apiService;
     }
 
@@ -50,19 +56,31 @@ class PaymentTransaction
      * @throws GuzzleException
      * @throws Exception
      */
-    public function getPaymentTransactionRequest(string $paymentRequestId): void
+    public function refreshTransaction(string $paymentRequestId): PaymentResponse
     {
         $response = $this->apiService->apiCall(
-            'POST',
+            'GET',
             BridgePayment::BRIDGE_API_URL . "/v2/payment-requests/$paymentRequestId",
-            []
+            ''
         );
 
         if ($response->getStatusCode() >= 400) {
-            throw new Exception(
-                Translator::getInstance()->trans("Can't revoke link.", [], BridgePayment::DOMAIN_NAME)
+            throw new BridgePaymentException(
+                (PaymentErrorResponse::class)($this->serializer->deserialize(
+                    $response->getBody()->getContents(),
+                    PaymentErrorResponse::class,
+                    'json'
+                ))
             );
         }
+
+        return $this->serializer->deserialize(
+            $response->getBody()->getContents(),
+            PaymentResponse::class,
+            'json'
+        );
+
+
     }
 
     /**

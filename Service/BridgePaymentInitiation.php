@@ -15,7 +15,6 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Thelia\Core\Translation\Translator;
 use Thelia\Model\Order;
 
 class BridgePaymentInitiation
@@ -53,12 +52,17 @@ class BridgePaymentInitiation
             )));
         }
 
-        $paymentInitiationResponse = $this->serializer->deserialize(
+        $paymentResponse = $this->serializer->deserialize(
             $response->getBody()->getContents(),
             PaymentResponse::class,
             'json'
         );
 
-        return $paymentInitiationResponse->consentUrl;
+        (new BridgePaymentTransaction())
+            ->setOrderId($order->getId())
+            ->setPaymentRequestId($paymentResponse->id)
+            ->save();
+
+        return $paymentResponse->consentUrl;
     }
 }
