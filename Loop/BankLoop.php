@@ -60,8 +60,7 @@ class BankLoop extends BaseLoop implements ArraySearchLoopInterface
             $loopResultRow
                 ->set('BANK_ID', $bank['id'])
                 ->set('BANK_NAME', $bank['name'])
-                ->set('BANK_LOGO', $bank['logo_url'])
-                ->set('BANK_PARENT', $bank['parent_name']);
+                ->set('BANK_LOGO', $bank['logo_url']);
 
             $loopResult->addRow($loopResultRow);
         }
