@@ -52,10 +52,10 @@
                                    id="search_bank" name="search_bank" value="">
                         </div>
                     </div>
-                    <div class="row" id="contentBanks" style="display:flex;flex-wrap:wrap;margin-top: 20px;">
-                        {loop type="bank_list" name="bank_list" limit=12}
+                    <div class="row" id="contentBanks" style="margin-top: 20px;">
+                        {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
                             <div class="col-lg-3">
-                                <a href="#" class="bank">
+                                <a href="{url path="/bridge/create-payment/"}{$orderId}/{$BANK_ID}" class="bank" data-id="{$BANK_ID}" class="bank" data-id="{$BANK_ID}">
                                     <figure>
                                         <img src="{$BANK_LOGO}">
                                     </figure>
@@ -66,12 +66,12 @@
                             </div>
                         {/loop}
                     </div>
-                    <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">
-                        <fieldset class="my-8">
-                            <input type="hidden" name="order_id" value="{$orderId}">
-                            <input type="hidden" id="bank_id" name="bank_id" value="">
-                        </fieldset>
-                    </form>
+{*                    <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">*}
+{*                        <fieldset class="my-8">*}
+{*                            <input type="hidden" name="order_id" value="{$orderId}">*}
+{*                            <input type="hidden" id="bank_id" name="bank_id" value="">*}
+{*                        </fieldset>*}
+{*                    </form>*}
                 </div>
             </div>
 
@@ -84,16 +84,14 @@
 {block name="javascript-initialization"}
     {strip}
         <script type="text/javascript">
-            function setupListeners() {
-                document.querySelectorAll(".bank").forEach(bank =>
-                    bank.addEventListener("click", function (ev) {
-                        ev.preventDefault();
-                        const inputBankId = document.getElementById('bank_id');
-                        const form = document.getElementById('payment_request_form');
-                        inputBankId.value = this.dataset.id;
-                        form.submit();
-                    }));
-            }
+            // document.querySelectorAll(".bank").forEach(bank =>
+            //     bank.addEventListener("click", function (ev) {
+            //         ev.preventDefault();
+            //         const inputBankId = document.getElementById('bank_id');
+            //         const form = document.getElementById('payment_request_form');
+            //         inputBankId.value = this.dataset.id;
+            //         form.submit();
+            //     }));
 
             document.getElementById('payment_request_form').addEventListener("click", function (ev) {
                 ev.preventDefault();
@@ -124,12 +122,8 @@
                                 console.log(error)
                             });
                     }();
-
-                    setupListeners();
                 }
             });
-
-            setupListeners();
         </script>
     {/strip}
 {/block}
