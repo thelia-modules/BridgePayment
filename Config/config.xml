@@ -48,9 +48,12 @@
     </services>
 
     <hooks>
-        <hook id="bridgepayment.hook" class="BridgePayment\Hook\BackHook">
+        <hook id="bridgepayment.hook.back" class="BridgePayment\Hook\BackHook">
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
             <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
+        </hook>
+        <hook id="bridgepayment.hook.front" class="BridgePayment\Hook\FrontHook">
+            <tag name="hook.event_listener" event="main.body-bottom" type="front" method="injectCSS" />
         </hook>
     </hooks>
 
