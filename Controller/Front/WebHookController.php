@@ -4,6 +4,7 @@ namespace BridgePayment\Controller\Front;
 
 use BridgePayment\BridgePayment;
 use BridgePayment\Model\Notification\Notification;
+use BridgePayment\Model\Notification\NotificationContent;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
 use Exception;
@@ -31,8 +32,8 @@ class WebHookController extends BaseFrontController
     public function notification(): Response
     {
         try {
-            $request = $this->getRequest();
 
+            $request = $this->getRequest();
             $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
             $encoder = new JsonEncoder();
             $serializer = new Serializer([$normalizer], [$encoder]);
@@ -59,13 +60,19 @@ class WebHookController extends BaseFrontController
                 'json'
             );
 
+            $notificationContent = $serializer->deserialize(
+                json_encode($notification->content),
+                NotificationContent::class,
+                'json'
+            );
+
             switch ($notification->type) {
                 case "payment.link.updated":
-                    $paymentLinkService->paymentLinkUpdate($notification->content);
+                    $paymentLinkService->paymentLinkUpdate($notificationContent);
                     break;
                 case "payment.transaction.updated":
                 case "payment.transaction.created":
-                    $paymentTransaction->savePaymentTransaction($notification->content, $notification->timestamp);
+                    $paymentTransaction->savePaymentTransaction($notificationContent, $notification->timestamp);
                     break;
                 default :
                     break;
@@ -74,9 +81,10 @@ class WebHookController extends BaseFrontController
             return new Response('OK', 200);
         } catch (Exception $ex) {
             Tlog::getInstance()->addError($ex->getMessage());
+            return new Response($ex->getMessage(), 400);
         }
 
-        return new Response('KO', 400);
+
     }
 
     /**
