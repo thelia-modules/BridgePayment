@@ -18,6 +18,7 @@
 
 {block name="main-content"}
     {$bank_page=1}
+
     {$current_page = $bank_page}
     {default_translation_domain domain="bridgepayment.fo.default"}
     <div class="main">
@@ -42,36 +43,34 @@
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-lg-12 control-input">
-                            <h4>{intl l="Thank you for the trust you place in us."}</h4>
+                            <h4>{intl l="Select your bank."}</h4>
                             <div class="mb-4">
-                                <p>{intl l="Select your bank to process."}</p>
+                                <label for="bank-list">{intl l="Enter your bank's name and select the good one."}</label>
                             </div>
                         </div>
                         <div class="col-lg-12 control-input">
-                            <input type="text" class="form-control" placeholder="{intl l='Search banks'}"
-                                   id="search_bank" name="search_bank" value="">
+
+                            <input list="bank-list-datalist" id="bank-list" name="bank-list" placeholder="{intl
+                            l="Min 2 characters"}">
+
+                            {$bankList = []}
+
+                            <datalist id="bank-list-datalist">
+                                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+                                    {$bankList[$BANK_NAME]['id'] = $BANK_ID}
+                                    {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+                                    {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+                                    {$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+
+                                    <option value="{$BANK_NAME}">
+                                {/loop}
+                            </datalist>
+
                         </div>
                     </div>
-                    <div class="row" id="contentBanks" style="margin-top: 20px;">
-                        {loop type="bank_list" name="bank_list" limit=12 order_id=$orderId}
-                            <div class="col-lg-3">
-                                <a href="{url path="/bridge/create-payment/"}{$orderId}/{$BANK_ID}" class="bank" data-id="{$BANK_ID}" class="bank" data-id="{$BANK_ID}">
-                                    <figure>
-                                        <img src="{$BANK_LOGO}">
-                                    </figure>
-                                    <div>
-                                        <div class="text-center">{$BANK_NAME}</div>
-                                    </div>
-                                </a>
-                            </div>
-                        {/loop}
-                    </div>
-{*                    <form id="payment_request_form" action="{url path="/bridge/create-payment"}" method="post">*}
-{*                        <fieldset class="my-8">*}
-{*                            <input type="hidden" name="order_id" value="{$orderId}">*}
-{*                            <input type="hidden" id="bank_id" name="bank_id" value="">*}
-{*                        </fieldset>*}
-{*                    </form>*}
+
+                    <div class="row" id="contentBanks" aria-autocomplete="none"></div>
+
                 </div>
             </div>
 
@@ -82,48 +81,56 @@
 {/block}
 
 {block name="javascript-initialization"}
-    {strip}
-        <script type="text/javascript">
-            // document.querySelectorAll(".bank").forEach(bank =>
-            //     bank.addEventListener("click", function (ev) {
-            //         ev.preventDefault();
-            //         const inputBankId = document.getElementById('bank_id');
-            //         const form = document.getElementById('payment_request_form');
-            //         inputBankId.value = this.dataset.id;
-            //         form.submit();
-            //     }));
+    <script>
+        const inputElt = document.getElementById('bank-list');
+        const listBank = JSON.parse(`{$bankList|json_encode nofilter}`);
+        const contentBanksElt = document.getElementById('contentBanks');
 
-            document.getElementById('payment_request_form').addEventListener("click", function (ev) {
-                ev.preventDefault();
-                const inputBankId = document.getElementById('bank_id');
-                const form = document.getElementById('payment_request_form');
-                inputBankId.value = this.dataset.id;
-                form.submit();
-            });
+        function createBankCard(bank) {
+            const card = document.createElement('div');
+            card.classList.add('col-lg-3');
+            const link = document.createElement('a');
+            link.href = `{url path="/bridge/create-payment/"}{$orderId}/`+ bank.id;
+            const figure = document.createElement('figure');
+            const img = document.createElement('img');
+            img.src = bank.logo;
+            const name = document.createElement('div');
+            name.innerHTML = bank.name;
+            name.classList.add('text-center');
 
-            const inputSearch = document.getElementById("search_bank");
-            const contentBanks = document.getElementById("contentBanks");
+            card.append(link);
+            link.append(figure);
+            link.append(name);
+            figure.append(img);
+            contentBanksElt.append(card);
+        }
 
-            inputSearch.addEventListener("keypress", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
+        function format(string){
+            return string .replace('é', 'e') .replace('è', 'e') .replace('ê','e') .replace('ô','o').replace('î', 'i').toLowerCase();
+        }
 
-                    var searchWord = this.value;
+        inputElt.addEventListener('input', (event) => {
+            const inputValue = format(event.target.value);
+            let inputValues = inputValue.split(' ');
 
-                    !async function () {
-                        contentBanks.innerHTML = await fetch("/bridge/bank/search/{$orderId}?search="+searchWord, {
-                            method: "GET"
-                        })
-                            .then((response) => response.text())
-                            .then((result) => {
-                                return result;
-                            })
-                            .catch((error) => {
-                                console.log(error)
-                            });
-                    }();
+            if (!inputValue || inputValue.length < 2)  {
+                contentBanksElt.innerHTML = "";
+                return;
+            }
+
+            contentBanksElt.innerHTML = "";
+
+            for (let val of Object.values(listBank)) {
+                if(inputValues.length === 2 && format(val.name).includes(inputValues[0]) && format(val.name).includes
+                (inputValues[1])){
+                    createBankCard(val);
+                } else if(inputValues.length >= 3 && format(val.name).includes(inputValues[0]) && format(val.name)
+                    .includes(inputValues[1]) && format(val.name).includes(inputValues[2])){
+                    createBankCard(val);
+                } else if(format(val.name).includes(inputValue)) {
+                    createBankCard(val);
                 }
-            });
-        </script>
-    {/strip}
+            }
+        })
+    </script>
 {/block}

@@ -34,6 +34,7 @@ class WebHookController extends BaseFrontController
         try {
 
             $request = $this->getRequest();
+            
             $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
             $encoder = new JsonEncoder();
             $serializer = new Serializer([$normalizer], [$encoder]);
