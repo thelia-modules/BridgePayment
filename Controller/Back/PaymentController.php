@@ -26,7 +26,7 @@ class PaymentController extends BaseAdminController
     {
         try {
             if(empty($paymentRequestId)){
-                $this->getRequest()->get('paymentRequestId');
+                $paymentRequestId = $this->getRequest()->get('paymentRequestId');
             }
 
             $paymentTransactionService = $this->getContainer()->get('bridgepayment.payment.transaction.service');
@@ -50,7 +50,6 @@ class PaymentController extends BaseAdminController
                 ->setStatus($paymentResponse->status)
                 ->setAmount($paymentResponse->transactions[0]['amount'])
                 ->save();
-
 
             return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/order/update/' . $paymentTransaction->getOrderId()));
         } catch (Exception|GuzzleException $ex) {

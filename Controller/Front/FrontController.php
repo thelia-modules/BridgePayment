@@ -140,25 +140,4 @@ class FrontController extends BaseFrontController
             );
         }
     }
-
-    /**
-     * route : "/bank/search/{orderId}"
-     * name : "bridgepayment_bank_search_order_cancel"
-     * methods : "GET")
-     */
-    public function searchBank(int $orderId) : Response
-    {
-        $request = $this->getRequest();
-        $search = $request->get('search');
-
-        $order = OrderQuery::create()->findPk($orderId);
-
-        if (!$order) {
-            return $this->pageNotFound();
-        }
-
-        return $this->render("bank-template", ['orderId' => $orderId, "search" => $search]);
-    }
-
-
 }
