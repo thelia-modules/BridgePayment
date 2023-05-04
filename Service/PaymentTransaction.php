@@ -116,13 +116,11 @@ class PaymentTransaction
             $bridgePaymentTransaction = new BridgePaymentTransaction();
         }
 
-
         $bridgePaymentTransaction
             ->setUuid($notification->paymentTransactionId)
             ->setStatusReason($notification->statusReason)
             ->setOrderId($order->getId())
             ->setTimestamp($timestamp)
-            ->setPaymentLinkId($notification->paymentLinkId)
             ->setPaymentRequestId($notification->paymentRequestId);
 
         if ($notification->status) {

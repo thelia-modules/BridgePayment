@@ -92,13 +92,7 @@ class PaymentLink
      */
     public function paymentLinkUpdate(NotificationContent $notification): void
     {
-        // TODO : Refacto méthode -> ne reçoit pas le statut du link mais celui de la transaction !!
         $paymentLink = BridgePaymentLinkQuery::create()
-            ->useOrderQuery()
-            ->useCustomerQuery()
-            ->filterByRef($notification->clientReference)
-            ->endUse()
-            ->endUse()
             ->filterByUuid($notification->paymentLinkId)
             ->findOne();
 

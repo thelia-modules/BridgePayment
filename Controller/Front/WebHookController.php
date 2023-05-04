@@ -7,6 +7,9 @@ use BridgePayment\Model\Notification\Notification;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
 use Exception;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Request;
@@ -29,7 +32,10 @@ class WebHookController extends BaseFrontController
     {
         try {
             $request = $this->getRequest();
-            $serializer = new Serializer();
+
+            $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+            $encoder = new JsonEncoder();
+            $serializer = new Serializer([$normalizer], [$encoder]);
 
             /** @var PaymentLink $paymentLinkService */
             $paymentLinkService = $this->getContainer()->get('bridgepayment.payment.link.service');
@@ -65,7 +71,7 @@ class WebHookController extends BaseFrontController
                     break;
             }
 
-            return new Response('OK');
+            return new Response('OK', 200);
         } catch (Exception $ex) {
             Tlog::getInstance()->addError($ex->getMessage());
         }
