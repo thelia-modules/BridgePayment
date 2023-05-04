@@ -40,9 +40,6 @@
     <route id="bridgepayment_order_cancel" path="/bridge/payment/{orderId}" methods="GET">
         <default key="_controller">BridgePayment\Controller\Front\FrontController::paymentCallback</default>
     </route>
-    <route id="bridgepayment_bank_search_order_cancel" path="/bridge/bank/search/{orderId}" methods="GET">
-        <default key="_controller">BridgePayment\Controller\Front\FrontController::searchBank</default>
-    </route>
 
     <route id="bridgepayment_create_payment" path="/bridge/create-payment/{order_id}/{bank_id}" methods="GET">
         <default key="_controller">BridgePayment\Controller\Front\PaymentController::createPayment</default>

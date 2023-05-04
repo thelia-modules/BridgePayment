@@ -104,14 +104,9 @@
             figure.append(img);
             contentBanksElt.append(card);
         }
+
         function format(string){
-            return string
-                .replace('é', 'e')
-                .replace('è', 'e')
-                .replace('ê','e')
-                .replace('ô','o')
-                .replace('î', 'i')
-                .toLowerCase();
+            return string .replace('é', 'e') .replace('è', 'e') .replace('ê','e') .replace('ô','o').replace('î', 'i').toLowerCase();
         }
 
         inputElt.addEventListener('input', (event) => {
@@ -129,12 +124,10 @@
                 if(inputValues.length === 2 && format(val.name).includes(inputValues[0]) && format(val.name).includes
                 (inputValues[1])){
                     createBankCard(val);
-                }
-                if(inputValues.length >= 3 && format(val.name).includes(inputValues[0]) && format(val.name).includes
-                (inputValues[1]) && format(val.name).includes(inputValues[2])){
+                } else if(inputValues.length >= 3 && format(val.name).includes(inputValues[0]) && format(val.name)
+                    .includes(inputValues[1]) && format(val.name).includes(inputValues[2])){
                     createBankCard(val);
-                }
-                if(format(val.name).includes(inputValue)) {
+                } else if(format(val.name).includes(inputValue)) {
                     createBankCard(val);
                 }
             }
