@@ -5,52 +5,56 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
     <loops>
-        <!-- sample definition
-        <loop name="MySuperLoop" class="BridgePayment\Loop\MySuperLoop" />
-        -->
+        <loop name="bank_list" class="BridgePayment\Loop\BankLoop" />
+        <loop name="payment_link_list" class="BridgePayment\Loop\PaymentLinkLoop" />
+        <loop name="payment_transaction_list" class="BridgePayment\Loop\PaymentTransactionLoop" />
     </loops>
 
     <forms>
         <form name="bridgepayment_form_bridge_payment_configuration" class="BridgePayment\Form\BridgePaymentConfiguration" />
     </forms>
 
-    <commands>
-        <!--
-        <command class="BridgePayment\Command\MySuperCommand" />
-        -->
-    </commands>
-
-
     <services>
+        <!-- SERVICES -->
+        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApi" />
 
-        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApiService">
+        <service id="bridgepayment.bank.service" class="BridgePayment\Service\BankService">
+            <argument type="service" id="bridgepayment.api.service" />
         </service>
 
-        <service id="bridgepayment.bank.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
+        <service id="bridgepayment.bridge.payment.initiation" class="BridgePayment\Service\BridgePaymentInitiation">
+            <argument type="service" id="bridgepayment.api.service" />
+        </service>
+
+        <service id="bridgepayment.payment.link.service" class="BridgePayment\Service\PaymentLink">
             <argument type="service" id="bridgepayment.api.service"/>
+        </service>
+
+        <service id="bridgepayment.payment.transaction.service" class="BridgePayment\Service\PaymentTransaction">
+            <argument type="service" id="bridgepayment.api.service"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="bridgepayment.refund.service" class="BridgePayment\Service\RefundService">
+            <argument type="service" id="bridgepayment.api.service"/>
+        </service>
+
+        <!-- LISTENERS -->
+        <service id="bridgepayment.bridge.bank.event.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
+            <argument type="service" id="bridgepayment.bank.service"/>
             <tag name="kernel.event_subscriber"/>
         </service>
+
     </services>
 
-
-
     <hooks>
-        <hook id="bridgepayment.hook" class="BridgePayment\Hook\BackHook">
+        <hook id="bridgepayment.hook.back" class="BridgePayment\Hook\BackHook">
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
             <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
         </hook>
+        <hook id="bridgepayment.hook.front" class="BridgePayment\Hook\FrontHook">
+            <tag name="hook.event_listener" event="main.body-bottom" type="front" method="injectCSS" />
+        </hook>
     </hooks>
 
-
-    <!--
-    <exports>
-
-    </exports>
-    -->
-
-    <!--
-    <imports>
-
-    </imports>
-    -->
 </config>

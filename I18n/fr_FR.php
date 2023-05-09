@@ -1,15 +1,49 @@
 <?php
 
-/*
- * This file is part of the Thelia package.
- * http://www.thelia.net
- *
- * (c) OpenStudio <info@thelia.net>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-return [
-    // 'an english string' => 'La traduction française de la chaine',
-];
+return array(
+    'Bank not found.' => 'Aucune banque trouvée.',
+    'Banks not found.' => 'Aucune banque trouvée.',
+    'Bridge payment error.' => 'Bridge erreur de paiement',
+    'Can\'t revoke link.' => 'Impossible de révoquer ce lien.',
+    'Company name' => 'Raison sociale',
+    'Firstname' => 'Nom',
+    'CREA' => 'Paiement créé',
+    'ACTC' => 'Paiement créé',
+    'PDNG' => 'En Attente',
+    'ACSC' => 'Payé',
+    'RJCT' => 'Annulé',
+    'VALID' => 'Valide',
+    'EXPIRED' => 'Expiré',
+    'REVOKED' => 'Révoqué',
+    'COMPLETED' => 'Complété',
+    'AC01' => '(IncorrectAccountNumber): the account number is either invalid or does not exist',
+    'AC04' => '(ClosedAccountNumber): the account is closed and cannot be used',
+    'AC06' => '(BlockedAccount): the account is blocked and cannot be used',
+    'AG01' => '(Transaction forbidden): Transaction forbidden on this type of account',
+    'AM18' => '(InvalidNumberOfTransactions): the number of transactions exceeds the ASPSP acceptance limit',
+    'CH03' => '(RequestedExecutionDateOrRequestedCollectionDateTooFarInFuture): The requested execution date is too far in the future',
+    'CUST' => '(RequestedByCustomer): The reject is due to the debtor: refusal or lack of liquidity',
+    'DS02' => '(OrderCancelled): An authorized user has cancelled the order',
+    'FF01' => '(InvalidFileFormat): The reject is due to the original Payment Request which is invalid (syntax, structure or values)',
+    'FRAD' => '(FraudulentOriginated): the Payment Request is considered as fraudulent',
+    'MS03' => '(NotSpecifiedReasonAgentGenerated): No reason specified by the ASPSP (usually the bank)',
+    'NOAS' => '(NoAnswerFromCustomer): The PSU (the user) has neither accepted nor rejected the Payment Request and a timeout has occurred',
+    'RR01' => '(MissingDebtorAccountOrIdentification): The Debtor account and/or Identification are missing or inconsistent',
+    'RR03' => '(MissingCreditorNameOrAddress): Specification of the creditor’s name and/or address needed for regulatory requirements is insufficient or missing',
+    'RR04' => '(RegulatoryReason): Reject from regulatory reason',
+    'RR12' => '(InvalidPartyID): Invalid or missing identification required within a particular country or payment type',
+    'Lastname' => 'Prénom',
+    'List of IP addresses allowed to use this payment on the front-office when in test mode (your current IP is %ip). One address per line' => 'Liste des IPs autorisées pour paiement en front-office en test-mode (your current IP is %ip). Une IP par ligne.',
+    'Maximum order total' => 'Maximum total commande',
+    'Maximum order total in the default currency for which this payment method is available. Enter 0 for no maximum' => 'Maximum total commande dans la devise par défaut. Saisir 0 pour ignorer ce minimum.',
+    'Minimum order total' => 'Minimum total commande',
+    'Minimum order total in the default currency for which this payment method is available. Enter 0 for no minimum' => 'Minimum total commande dans la devise par défaut. Saisir 0 pour ignorer ce minimum.',
+    'Payment request closed.' => 'Requête de paiement en clôturée. ',
+    'Payment request error.' => 'Requête de paiement en échec.',
+    'Received failed order id' => 'Mauvais ID de commande reçu',
+    'Received failed order id does not belong to the current customer' => 'Mauvais ID de commande reçu',
+    'Store bank' => 'Banque du store',
+    'Use payment link method.' => 'Utiliser un paiement par lien',
+    'We\'re sorry, a problem occurred and your payment was not successful.' => 'Nous sommes désolés, il y a eu un problème sur votre paiement.',
+    'We\'re sorry, revoked or expired payment link.' => 'Nous sommes désolés, lien de paiement révoqué ou expiré.',
+);

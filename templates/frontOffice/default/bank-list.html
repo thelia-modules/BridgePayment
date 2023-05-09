@@ -17,37 +17,120 @@
 {/block}
 
 {block name="main-content"}
+    {$bank_page=1}
+
+    {$current_page = $bank_page}
     {default_translation_domain domain="bridgepayment.fo.default"}
+    <div class="main">
+        <article class="col-main clearfix" role="main" aria-labelledby="main-label">
 
-<div class="main">
-    <article class="col-main clearfix" role="main" aria-labelledby="main-label">
+            <h1 id="main-label" class="page-header">{intl l="Your Cart"}</h1>
 
-        <h1 id="main-label" class="page-header">{intl l="Secure payment"}</h1>
-        {loop type="order" name="placed-order" id=$order_id}
-        <div id="payment-success" class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">{intl l="You choose to pay by"} : <span class="payment-method label label-primary">{loop name="payment-module" type="module" id=$PAYMENT_MODULE}{$TITLE}{/loop}</span></h3>
-            </div>
+            {include file="misc/checkout-progress.tpl" step="last"}
 
-            <div class="panel-body">
-                <div class="form-container">
-                    <form action="{url path="/bridge/create-payment"}" method="post">
-                        <input type="hidden" name="order_id" value="{$order_id}">
-                        <label for="bank-select">{intl l="Choose a bank"}</label>
-                        <select name="bank" id="bank-select" class="form-control">
-                            {foreach $banks as $bank}
-                                <option value="{$bank['id']}" >
-                                    {$bank['name']}
-                                </option>
-                            {/foreach}
-                        </select>
-                        <input type="submit" class="btn btn-success" value="{intl l="Confirm"}">
-                    </form>
+            <div id="payment-failure" class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        {loop type="order" name="bridge-payment-order" id=$order_id}
+                        {intl l="You choose to pay by"} :
+                            <span class="payment-method label label-primary">{loop name="payment-module" type="module" code="BridgePayment"}{$TITLE}{/loop}</span>
+                        {/loop}
+                        {elseloop rel="bridge-payment-order"}
+                        {intl l="Your order payment"}
+                        {/elseloop}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-12 control-input">
+                            <h4>{intl l="Select your bank."}</h4>
+                            <div class="mb-4">
+                                <label for="bank-list">{intl l="Enter your bank's name and select the good one."}</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 control-input">
+
+                            <input list="bank-list-datalist" id="bank-list" name="bank-list" placeholder="{intl
+                            l="Min 2 characters"}">
+
+                            {$bankList = []}
+
+                            <datalist id="bank-list-datalist">
+                                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+                                    {$bankList[$BANK_NAME]['id'] = $BANK_ID}
+                                    {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+                                    {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+                                    {$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+
+                                    <option value="{$BANK_NAME}">
+                                {/loop}
+                            </datalist>
+
+                        </div>
+                    </div>
+
+                    <div class="row" id="contentBanks" aria-autocomplete="none"></div>
+
                 </div>
             </div>
-        </div>
-        {/loop}
-    </article>
-</div>
 
+            <a href="{url path="/order/invoice"}" role="button" class="btn btn-primary">{intl l="Cancel"}</a>
+            <a href="{navigate to="index"}" role="button" class="btn btn-default">{intl l="Go home"}</a>
+        </article>
+    </div>
+{/block}
+
+{block name="javascript-initialization"}
+    <script>
+        const inputElt = document.getElementById('bank-list');
+        const listBank = JSON.parse(`{$bankList|json_encode nofilter}`);
+        const contentBanksElt = document.getElementById('contentBanks');
+
+        function createBankCard(bank) {
+            const card = document.createElement('div');
+            card.classList.add('col-lg-3');
+            const link = document.createElement('a');
+            link.href = `{url path="/bridge/create-payment/"}{$orderId}/`+ bank.id;
+            const figure = document.createElement('figure');
+            const img = document.createElement('img');
+            img.src = bank.logo;
+            const name = document.createElement('div');
+            name.innerHTML = bank.name;
+            name.classList.add('text-center');
+
+            card.append(link);
+            link.append(figure);
+            link.append(name);
+            figure.append(img);
+            contentBanksElt.append(card);
+        }
+
+        function format(string){
+            return string .replace('é', 'e') .replace('è', 'e') .replace('ê','e') .replace('ô','o').replace('î', 'i').toLowerCase();
+        }
+
+        inputElt.addEventListener('input', (event) => {
+            const inputValue = format(event.target.value);
+            let inputValues = inputValue.split(' ');
+
+            if (!inputValue || inputValue.length < 2)  {
+                contentBanksElt.innerHTML = "";
+                return;
+            }
+
+            contentBanksElt.innerHTML = "";
+
+            for (let val of Object.values(listBank)) {
+                if(inputValues.length === 2 && format(val.name).includes(inputValues[0]) && format(val.name).includes
+                (inputValues[1])){
+                    createBankCard(val);
+                } else if(inputValues.length >= 3 && format(val.name).includes(inputValues[0]) && format(val.name)
+                    .includes(inputValues[1]) && format(val.name).includes(inputValues[2])){
+                    createBankCard(val);
+                } else if(format(val.name).includes(inputValue)) {
+                    createBankCard(val);
+                }
+            }
+        })
+    </script>
 {/block}
