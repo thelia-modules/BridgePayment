@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Thelia\Model\ConfigQuery;
@@ -18,7 +19,7 @@ use Thelia\Model\CountryQuery;
 
 class BridgePaymentConfiguration extends BaseForm
 {
-    protected function buildForm(): void
+    protected function buildForm(Request $request): void
     {
         $this->formBuilder
             ->add(
@@ -31,7 +32,7 @@ class BridgePaymentConfiguration extends BaseForm
                         'TEST' => 'Test',
                         'PRODUCTION' => 'Production',
                     ],
-                    'label' => Translator::getInstance()->trans('Mode de fonctionnement', [], BridgePayment::DOMAIN_NAME),
+                    'label' => Translator::getInstance()?->trans('Mode de fonctionnement', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'run_mode'
                     ],
@@ -44,7 +45,7 @@ class BridgePaymentConfiguration extends BaseForm
                 [
                     'required' => false,
                     'choices' => $this->getBanks(),
-                    'label' => Translator::getInstance()->trans('Store bank', [], BridgePayment::DOMAIN_NAME),
+                    'label' => Translator::getInstance()?->trans('Store bank', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'bank_id'
                     ],
@@ -57,7 +58,7 @@ class BridgePaymentConfiguration extends BaseForm
                 [
                     'constraints' => [new NotBlank()],
                     'required' => true,
-                    'label' => Translator::getInstance()->trans('Client Id'),
+                    'label' => Translator::getInstance()?->trans('Client Id'),
                     'label_attr' => [
                         'for' => 'client_id'
                     ],
@@ -70,7 +71,7 @@ class BridgePaymentConfiguration extends BaseForm
                 [
                     'constraints' => [new NotBlank()],
                     'required' => true,
-                    'label' => Translator::getInstance()->trans('Client secret'),
+                    'label' => Translator::getInstance()?->trans('Client secret'),
                     'label_attr' => [
                         'for' => 'client_secret'
                     ],
@@ -81,8 +82,9 @@ class BridgePaymentConfiguration extends BaseForm
                 'hook_secret',
                 TextType::class,
                 [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('Hook Secret', [], BridgePayment::DOMAIN_NAME),
+                    'required' => true,
+                    'constraints' => [new NotBlank()],
+                    'label' => Translator::getInstance()?->trans('Hook Secret', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'hook_secret'
                     ],
@@ -90,23 +92,11 @@ class BridgePaymentConfiguration extends BaseForm
                 ]
             )
             ->add(
-                'iban',
-                TextType::class,
-                [
-                    'required' => false,
-                    'label' => Translator::getInstance()->trans('IBAN', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'iban'
-                    ],
-                    'data' => BridgePayment::getConfigValue('iban', ''),
-                ]
-            )
-            ->add(
                 'redirect_mode',
                 CheckboxType::class,
                 [
                     'required' => false,
-                    'label' => Translator::getInstance()->trans('Redirect payment to Bridge', [], BridgePayment::DOMAIN_NAME),
+                    'label' => Translator::getInstance()?->trans('Use payment link method.', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'redirect_mode'
                     ],
@@ -118,14 +108,14 @@ class BridgePaymentConfiguration extends BaseForm
                 TextareaType::class,
                 [
                     'required' => false,
-                    'label' => Translator::getInstance()->trans('Allowed IPs in test mode'),
+                    'label' => Translator::getInstance()?->trans('Allowed IPs in test mode'),
                     'data' => BridgePayment::getConfigValue('allowed_ip_list'),
                     'label_attr' => [
                         'for' => 'allowed_ip_list',
-                        'help' => Translator::getInstance()->trans(
+                        'help' => Translator::getInstance()?->trans(
                             'List of IP addresses allowed to use this payment on the front-office when in test mode (your current IP is %ip). One address per line',
                             [
-                                '%ip' => $this->getRequest()->getClientIp()
+                                '%ip' => $request->getClientIp()
                             ]
                         ),
                         'rows' => 3
@@ -143,11 +133,11 @@ class BridgePaymentConfiguration extends BaseForm
                         ])
                     ),
                     'required' => true,
-                    'label' => Translator::getInstance()->trans('Minimum order total'),
+                    'label' => Translator::getInstance()?->trans('Minimum order total'),
                     'data' => BridgePayment::getConfigValue('minimum_amount', 0),
                     'label_attr' => [
                         'for' => 'minimum_amount',
-                        'help' => Translator::getInstance()->trans('Minimum order total in the default currency for which this payment method is available. Enter 0 for no minimum')
+                        'help' => Translator::getInstance()?->trans('Minimum order total in the default currency for which this payment method is available. Enter 0 for no minimum')
                     ],
                     'attr' => [
                         'step' => 'any'
@@ -167,11 +157,11 @@ class BridgePaymentConfiguration extends BaseForm
                         )
                     ],
                     'required' => true,
-                    'label' => Translator::getInstance()->trans('Maximum order total'),
+                    'label' => Translator::getInstance()?->trans('Maximum order total'),
                     'data' => BridgePayment::getConfigValue('maximum_amount', 0),
                     'label_attr' => [
                         'for' => 'maximum_amount',
-                        'help' => Translator::getInstance()->trans('Maximum order total in the default currency for which this payment method is available. Enter 0 for no maximum')
+                        'help' => Translator::getInstance()?->trans('Maximum order total in the default currency for which this payment method is available. Enter 0 for no maximum')
                     ],
                     'attr' => [
                         'step' => 'any'
@@ -180,12 +170,16 @@ class BridgePaymentConfiguration extends BaseForm
             );
     }
 
-    protected function getBanks(): array
+    protected function getBanks(EventDispatcherInterface $eventDispatcher): array
     {
         $event = (new BridgeBankEvent())
-            ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country')));
+            ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country', 64)));
 
-        $this->dispatcher->dispatch(BridgeBankEvent::GET_BANKS_EVENT, $event);
+        $eventDispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
+
+        if($event->getError()){
+            return [];
+        }
 
         $bankChoices = [];
 
@@ -194,5 +188,10 @@ class BridgePaymentConfiguration extends BaseForm
         }
 
         return $bankChoices;
+    }
+
+    public static function getName(): string
+    {
+        return 'bridgepayment_form_bridge_payment_configuration';
     }
 }

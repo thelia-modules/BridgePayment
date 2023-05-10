@@ -7,7 +7,6 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Event\Order\OrderEvent;
@@ -16,6 +15,7 @@ use Thelia\Core\Translation\Translator;
 use Thelia\Model\OrderQuery;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Tools\URL;
+use Thelia\Core\HttpFoundation\Request;
 
 /**
  * route : "/admin/module/bridgepayment/refund"
@@ -29,12 +29,10 @@ class RefundController extends BaseAdminController
      * methods : "POST")
      * @throws GuzzleException
      */
-    public function refund(): Response
+    public function refund(Request $request): Response
     {
         /** @var BridgeApi $bridgeApiService */
         $bridgeApiService = $this->getContainer()->get('bridgepayment.api.service');
-        /** @var Request $request */
-        $request = $this->getRequest();
 
         $orderId = $request->get('order_id');
 
@@ -66,11 +64,8 @@ class RefundController extends BaseAdminController
      * methods : "GET")
      * @return RedirectResponse|Response
      */
-    public function refundSuccess($orderId): Response
+    public function refundSuccess(int $orderId, EventDispatcherInterface $eventDispatcher): Response
     {
-        /** @var EventDispatcherInterface $eventDispatcher */
-        $eventDispatcher = $this->getDispatcher();
-
         $order = OrderQuery::create()->findPk($orderId);
 
         $orderStatus = OrderStatusQuery::create()
@@ -80,7 +75,8 @@ class RefundController extends BaseAdminController
         try {
             $event = new OrderEvent($order);
             $event->setStatus($orderStatus->getId());
-            $eventDispatcher->dispatch(TheliaEvents::ORDER_UPDATE_STATUS, $event);
+            $eventDispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
+
         } catch (Exception $exception) {
             return $this->generateRedirect(URL::getInstance()->absoluteUrl("/admin/order/update/$orderId", [
                 'update_status_error_message' => $exception->getMessage()

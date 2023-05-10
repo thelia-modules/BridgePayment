@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database defaultIdMethod="native" name="thelia" namespace="BridgePayment\Model">
+<database defaultIdMethod="native" name="TheliaMain" namespace="BridgePayment\Model">
 
   <table name="bridge_payment_link">
     <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER" />

@@ -3,6 +3,7 @@
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Form\BridgePaymentConfiguration;
 use Exception;
 use GuzzleHttp\Psr7\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +41,7 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $configurationForm = $this->createForm("bridgepayment_form_bridge_payment_configuration");
+        $configurationForm = $this->createForm(BridgePaymentConfiguration::getName());
 
         try {
             $form = $this->validateForm($configurationForm, "POST");

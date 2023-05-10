@@ -3,8 +3,6 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\Exception\BridgePaymentException;
-use BridgePayment\Model\Api\Transaction;
-use BridgePayment\Request\PaymentRequest;
 use BridgePayment\Response\PaymentErrorResponse;
 use BridgePayment\Response\PaymentResponse;
 use DateTime;
@@ -36,18 +34,17 @@ class PaymentTransaction
         'RJCT' => '#e3138b'
     ];
     /** @var BridgeApi */
-    protected $apiService;
+    protected BridgeApi $apiService;
     /** @var Serializer */
-    public $serializer;
-    /** @var EventDispatcherInterface */
-    protected $dispatcher;
+    public Serializer $serializer;
 
+    /**
+     * @param BridgeApi $apiService
+     */
     public function __construct(
         BridgeApi                $apiService,
-        EventDispatcherInterface $dispatcher
     )
     {
-        $this->dispatcher = $dispatcher;
         $this->serializer = new Serializer([new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())], [new JsonEncoder()]);
         $this->apiService = $apiService;
     }
@@ -141,25 +138,15 @@ class PaymentTransaction
     /**
      * @throws PropelException
      */
-    protected function updateOrderStatus(string $status, Order $order, string $transactionRef = null): void
+    protected function updateOrderStatus(string $status, Order $order, string $transactionRef = null, EventDispatcherInterface $eventDispatcher): void
     {
-        switch ($status) {
-            case "CREA":
-            case "ACTC":
-                $orderStatusCode = 'payment_created';
-                break;
-            case "PDNG":
-                $orderStatusCode = "payment_pending";
-                break;
-            case "RJCT":
-                $orderStatusCode = "payment_rejected";
-                break;
-            case "ACSC":
-                $orderStatusCode = "paid";
-                break;
-            default :
-                $orderStatusCode = 'payment_created';
-        }
+        $orderStatusCode = match ($status) {
+            "CREA", "ACTC" => 'payment_created',
+            "PDNG" => "payment_pending",
+            "RJCT" => "payment_rejected",
+            "ACSC" => "paid",
+            default => 'payment_created',
+        };
 
         $orderStatus = OrderStatusQuery::create()
             ->filterByCode($orderStatusCode)
@@ -167,7 +154,7 @@ class PaymentTransaction
 
         if (null !== $orderStatus) {
             $event = (new OrderEvent($order))->setStatus($orderStatus->getId());
-            $this->dispatcher->dispatch( TheliaEvents::ORDER_UPDATE_STATUS, $event);
+            $eventDispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
 
             if ($event->getOrder()->isPaid()) {
                 $event->getOrder()->setTransactionRef($transactionRef)->save();

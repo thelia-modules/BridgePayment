@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Tools\URL;
 
@@ -22,11 +23,11 @@ class PaymentController extends BaseAdminController
      * name : "_refresh", methods="GET")
      * @return Response|JsonResponse|RedirectResponse
      */
-    public function refreshTransaction(string $paymentRequestId)
+    public function refreshTransaction(string $paymentRequestId, Request $request)
     {
         try {
             if(empty($paymentRequestId)){
-                $paymentRequestId = $this->getRequest()->get('paymentRequestId');
+                $paymentRequestId = $request->get('paymentRequestId');
             }
 
             $paymentTransactionService = $this->getContainer()->get('bridgepayment.payment.transaction.service');
