@@ -8,6 +8,7 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Thelia\Install\Database;
@@ -17,6 +18,7 @@ use Thelia\Model\OrderStatus;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Module\AbstractPaymentModule;
 use Thelia\Tools\URL;
+use Thelia\Core\HttpFoundation\Request;
 
 class BridgePayment extends AbstractPaymentModule
 {
@@ -155,7 +157,7 @@ class BridgePayment extends AbstractPaymentModule
         );
     }
 
-    public function isValidPayment(): bool
+    public function isValidPayment(Request $request): bool
     {
         $valid = true;
         if ('Test' === self::getConfigValue('run_mode')) {
@@ -167,7 +169,7 @@ class BridgePayment extends AbstractPaymentModule
                 $allowed_client_ips[] = trim($ip);
             }
 
-            $client_ip = $this->getRequest()->getClientIp();
+            $client_ip = $request->getClientIp();
 
             $valid = in_array($client_ip, $allowed_client_ips, true) || in_array('*', $allowed_client_ips, true);
         }
@@ -187,5 +189,16 @@ class BridgePayment extends AbstractPaymentModule
         $max_amount = self::getConfigValue($max, 0);
 
         return $order_total > 0 && ($min_amount <= 0 || $order_total >= $min_amount) && ($max_amount <= 0 || $order_total <= $max_amount);
+    }
+
+    /**
+     * Defines how services are loaded in your modules.
+     */
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR.ucfirst(self::getModuleCode()).'/I18n/*'])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }

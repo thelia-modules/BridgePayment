@@ -9,6 +9,7 @@ use Exception;
 use Front\Front;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Front\BaseFrontController;
+use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
 use Thelia\Exception\TheliaProcessException;
@@ -26,13 +27,12 @@ class FrontController extends BaseFrontController
      * route : "/payment/{orderId}"
      * name : "bridgepayment_order_cancel"
      * methods : "GET")
+     * @param int $orderId
      * @return Response|RedirectResponse
      */
-    public function paymentCallback( int $orderId )
+    public function paymentCallback(int $orderId, Request $request): Response|RedirectResponse
     {
         try {
-            $request = $this->getRequest();
-
             if (!$cancelOrder = OrderQuery::create()->findPk($orderId)) {
                 Tlog::getInstance()->warning("Failed order ID '$orderId' not found.");
 

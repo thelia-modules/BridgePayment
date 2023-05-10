@@ -29,11 +29,9 @@ class WebHookController extends BaseFrontController
      * name : ""
      * methods : "POST")
      */
-    public function notification(): Response
+    public function notification(Request $request): Response
     {
         try {
-
-            $request = $this->getRequest();
             $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
             $encoder = new JsonEncoder();
             $serializer = new Serializer([$normalizer], [$encoder]);

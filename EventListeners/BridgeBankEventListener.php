@@ -4,13 +4,14 @@ namespace BridgePayment\EventListeners;
 
 use BridgePayment\Event\BridgeBankEvent;
 use BridgePayment\Service\BankService;
+use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class BridgeBankEventListener implements EventSubscriberInterface
 {
-    /** @var BridgeBankEvent */
-    protected $bankService;
+    /** @var BankService|BridgeBankEvent */
+    protected BridgeBankEvent|BankService $bankService;
 
     public function __construct(
         BankService $bankService
@@ -21,6 +22,7 @@ class BridgeBankEventListener implements EventSubscriberInterface
 
     /**
      * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function getBanks(BridgeBankEvent $bridgeBankEvent) : void
     {
