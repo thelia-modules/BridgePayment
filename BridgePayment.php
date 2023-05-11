@@ -18,7 +18,6 @@ use Thelia\Model\OrderStatus;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Module\AbstractPaymentModule;
 use Thelia\Tools\URL;
-use Thelia\Core\HttpFoundation\Request;
 
 class BridgePayment extends AbstractPaymentModule
 {
@@ -112,7 +111,7 @@ class BridgePayment extends AbstractPaymentModule
 
     /**
      * @param Order $order
-     * @return Response|RedirectResponse
+     * @return Response
      */
     public function pay(Order $order): Response
     {
@@ -157,7 +156,7 @@ class BridgePayment extends AbstractPaymentModule
         );
     }
 
-    public function isValidPayment(Request $request): bool
+    public function isValidPayment(): bool
     {
         $valid = true;
         if ('Test' === self::getConfigValue('run_mode')) {
@@ -169,7 +168,7 @@ class BridgePayment extends AbstractPaymentModule
                 $allowed_client_ips[] = trim($ip);
             }
 
-            $client_ip = $request->getClientIp();
+            $client_ip = $this->getRequest()->getClientIp();
 
             $valid = in_array($client_ip, $allowed_client_ips, true) || in_array('*', $allowed_client_ips, true);
         }

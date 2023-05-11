@@ -136,6 +136,10 @@ class PaymentTransaction
     }
 
     /**
+     * @param string $status
+     * @param Order $order
+     * @param string|null $transactionRef
+     * @param EventDispatcherInterface $eventDispatcher
      * @throws PropelException
      */
     protected function updateOrderStatus(string $status, Order $order, string $transactionRef = null, EventDispatcherInterface $eventDispatcher): void

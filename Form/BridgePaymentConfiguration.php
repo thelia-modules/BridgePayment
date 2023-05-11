@@ -11,7 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Thelia\Model\ConfigQuery;
@@ -19,7 +18,7 @@ use Thelia\Model\CountryQuery;
 
 class BridgePaymentConfiguration extends BaseForm
 {
-    protected function buildForm(Request $request): void
+    protected function buildForm(): void
     {
         $this->formBuilder
             ->add(
@@ -115,7 +114,7 @@ class BridgePaymentConfiguration extends BaseForm
                         'help' => Translator::getInstance()?->trans(
                             'List of IP addresses allowed to use this payment on the front-office when in test mode (your current IP is %ip). One address per line',
                             [
-                                '%ip' => $request->getClientIp()
+                                '%ip' => $this->getRequest()->getClientIp()
                             ]
                         ),
                         'rows' => 3
@@ -170,12 +169,12 @@ class BridgePaymentConfiguration extends BaseForm
             );
     }
 
-    protected function getBanks(EventDispatcherInterface $eventDispatcher): array
+    protected function getBanks(): array
     {
         $event = (new BridgeBankEvent())
             ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country', 64)));
 
-        $eventDispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
+        $this->dispatcher->dispatch($event, BridgeBankEvent::GET_BANKS_EVENT);
 
         if($event->getError()){
             return [];

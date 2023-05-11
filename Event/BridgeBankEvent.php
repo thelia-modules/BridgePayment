@@ -11,7 +11,7 @@ class BridgeBankEvent extends Event
 
     protected mixed $banks;
 
-    protected mixed $error;
+    protected ?string $error = null;
 
     /** @var Country */
     protected Country $country;
@@ -35,9 +35,9 @@ class BridgeBankEvent extends Event
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getError(): mixed
+    public function getError(): string|null
     {
         return $this->error;
     }
