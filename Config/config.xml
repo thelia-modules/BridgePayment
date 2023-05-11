@@ -16,7 +16,7 @@
 
     <services>
         <!-- SERVICES -->
-        <service id="bridgepayment.api.service" class="BridgePayment\Service\BridgeApi" />
+        <service id="bridgepayment.api.service" alias="BridgePayment\Service\BridgeApi" public="true" />
 
         <service id="bridgepayment.bank.service" class="BridgePayment\Service\BankService">
             <argument type="service" id="bridgepayment.api.service" />
