@@ -3,13 +3,13 @@
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\Model\BridgePaymentLinkQuery;
+use BridgePayment\Service\PaymentLink;
 use DateTime;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Tools\URL;
 
 /**
@@ -26,7 +26,8 @@ class PaymentLinkController extends BaseAdminController
     {
         try {
             $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
-            if($paymentLinkservice->revokeLink($paymentLinkUuid)){
+
+            if ($paymentLinkservice->revokeLink($paymentLinkUuid)) {
                 $this->refreshLink($paymentLinkUuid);
             }
 
@@ -43,11 +44,12 @@ class PaymentLinkController extends BaseAdminController
     /**
      * route : "/refresh/{paymentLinkUuid}"
      * name : "_refresh", methods="GET")
-     * @return Response|JsonResponse|RedirectResponse
+     * @return JsonResponse|RedirectResponse
      */
     public function refreshLink(string $paymentLinkUuid)
     {
         try {
+            /** @var PaymentLink $paymentLinkservice */
             $paymentLinkservice = $this->getContainer()->get('bridgepayment.payment.link.service');
 
             $paymentLink = BridgePaymentLinkQuery::create()
@@ -55,7 +57,7 @@ class PaymentLinkController extends BaseAdminController
                 ->findOne();
 
             if (!$paymentLink) {
-                return $this->pageNotFound();
+                throw new Exception("Page not found");
             }
 
             $paymentLinkResponse = $paymentLinkservice->refreshLink($paymentLinkUuid);

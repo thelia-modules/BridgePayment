@@ -3,7 +3,6 @@
 namespace BridgePayment\Form;
 
 use BridgePayment\BridgePayment;
-use BridgePayment\Event\BridgeBankEvent;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -13,8 +12,6 @@ use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
-use Thelia\Model\ConfigQuery;
-use Thelia\Model\CountryQuery;
 
 class BridgePaymentConfiguration extends BaseForm
 {
@@ -36,19 +33,6 @@ class BridgePaymentConfiguration extends BaseForm
                         'for' => 'run_mode'
                     ],
                     'data' => BridgePayment::getConfigValue('run_mode'),
-                ]
-            )
-            ->add(
-                'bank_id',
-                ChoiceType::class,
-                [
-                    'required' => false,
-                    'choices' => $this->getBanks(),
-                    'label' => Translator::getInstance()->trans('Store bank', [], BridgePayment::DOMAIN_NAME),
-                    'label_attr' => [
-                        'for' => 'bank_id'
-                    ],
-                    'data' => BridgePayment::getConfigValue('bank_id'),
                 ]
             )
             ->add(
@@ -167,25 +151,5 @@ class BridgePaymentConfiguration extends BaseForm
                     ]
                 ]
             );
-    }
-
-    protected function getBanks(): array
-    {
-        $event = (new BridgeBankEvent())
-            ->setCountry(CountryQuery::create()->findPk(ConfigQuery::read('store_country', 64)));
-
-        $this->dispatcher->dispatch(BridgeBankEvent::GET_BANKS_EVENT, $event);
-
-        if($event->getError()){
-            return [];
-        }
-
-        $bankChoices = [];
-
-        foreach ($event->getBanks() as $bank) {
-            $bankChoices[$bank['name']] = $bank['id'];
-        }
-
-        return $bankChoices;
     }
 }

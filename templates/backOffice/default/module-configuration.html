@@ -39,6 +39,10 @@
                     <div class="alert alert-danger">{$form_error_message}</div>
                 {/if}
 
+                {form_field form=$form field='error_url'}
+                    <input type="hidden" name="{$name}" value="{url path={navigate to="current"}}"/>
+                {/form_field}
+
                 {form_field form=$form field='success_url'}
                     <input type="hidden" name="{$name}" value="{url path={navigate to="current"}}"/>
                 {/form_field}
@@ -92,6 +96,12 @@
                             </div>
                             <div class="col-md-12">
                                 {render_form_field field="hook_secret"}
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label" for="url_callback">{intl l="URL de callback"}</label>
+                                    <input id="url_callback" type="text" class="form-control" readonly value="{url path="/bridge/notification"}">
+                                </div>
                             </div>
                         </div>
                         <div class="block col-md-12">

@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-lg-12 control-input">
+        <h4>{intl l="Select your bank."}</h4>
+        <div class="mb-4">
+            <label for="bank-list">{intl l="Enter your bank's name and select the good one."}</label>
+        </div>
+    </div>
+    <div class="col-lg-12 control-input">
+
+        <input list="bank-list-datalist" id="bank-list" name="bank-list" placeholder="{intl l="Saisir le nom de votre banque..."}">
+
+        {$bankList = []}
+
+        <datalist id="bank-list-datalist">
+            {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+            {$bankList[$BANK_NAME]['id'] = $BANK_ID}
+            {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+            {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+            {$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+
+            <option value="{$BANK_NAME}">
+                {/loop}
+        </datalist>
+
+    </div>
+</div>
+
+<div class="row" id="contentBanks" aria-autocomplete="none"></div>

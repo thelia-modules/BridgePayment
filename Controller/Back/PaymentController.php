@@ -3,6 +3,7 @@
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\Model\BridgePaymentTransactionQuery;
+use BridgePayment\Service\PaymentTransaction;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -22,14 +23,12 @@ class PaymentController extends BaseAdminController
      * name : "_refresh", methods="GET")
      * @return Response|JsonResponse|RedirectResponse
      */
-    public function refreshTransaction(string $paymentRequestId)
+    public function refreshTransaction(string $paymentRequestId = null)
     {
         try {
-            if(empty($paymentRequestId)){
+            if (!$paymentRequestId) {
                 $paymentRequestId = $this->getRequest()->get('paymentRequestId');
             }
-
-            $paymentTransactionService = $this->getContainer()->get('bridgepayment.payment.transaction.service');
 
             $paymentTransaction = BridgePaymentTransactionQuery::create()
                 ->filterByPaymentRequestId($paymentRequestId)
@@ -39,9 +38,12 @@ class PaymentController extends BaseAdminController
                 return $this->pageNotFound();
             }
 
+            /** @var PaymentTransaction $paymentTransactionService */
+            $paymentTransactionService = $this->getContainer()->get('bridgepayment.payment.transaction.service');
+
             $paymentResponse = $paymentTransactionService->refreshTransaction($paymentRequestId);
 
-            if(isset($paymentResponse->statusReason)){
+            if (isset($paymentResponse->statusReason)) {
                 $paymentTransaction->setStatusReason($paymentResponse->statusReason);
             }
 

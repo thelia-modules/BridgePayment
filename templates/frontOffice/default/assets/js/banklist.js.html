@@ -1,0 +1,12 @@
+{loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+{$bankList[$BANK_NAME]['id'] = $BANK_ID}
+{$bankList[$BANK_NAME]['name'] = $BANK_NAME}
+{$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}
+{$bankList[$BANK_NAME]['parentName'] = $BANK_PARENT}
+{/loop}
+<script type="application/javascript">
+
+    const bankListContainer = document.getElementById('payment_{$MODULE_ID}');
+
+    bankListContainer.insertAdjacentHTML('afterend', "");
+</script>

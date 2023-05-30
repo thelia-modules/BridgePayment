@@ -12,4 +12,12 @@ class FrontHook extends BaseHook
     {
         $event->add($this->addCSS('assets/css/bankList.css'));
     }
+
+    public function injectBanks(HookRenderEvent $event)
+    {
+        $moduleId = BridgePayment::getModuleId();
+        $event->add($this->render('assets/js/banklist.js.html', [
+            "MODULE_ID" => $moduleId
+        ]));
+    }
 }

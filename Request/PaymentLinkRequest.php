@@ -37,7 +37,7 @@ class PaymentLinkRequest implements JsonSerializable
         $this->user = $this->constructUserPaymentLinkRequest($order);
 
         $orderCreatedAt = new DateTimeImmutable($order->getCreatedAt()->format('Y-M-d H:i:s'));
-        $interval = DateInterval::createFromDateString('1 day');
+        $interval = DateInterval::createFromDateString('30 day');
         $this->expiredDate = $orderCreatedAt->add($interval)->format('Y-m-d\\TH:i:s.O');
 
         $this->clientReference = $order->getCustomer()->getRef();

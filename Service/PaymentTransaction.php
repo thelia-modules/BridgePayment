@@ -3,8 +3,6 @@
 namespace BridgePayment\Service;
 
 use BridgePayment\Exception\BridgePaymentException;
-use BridgePayment\Model\Api\Transaction;
-use BridgePayment\Request\PaymentRequest;
 use BridgePayment\Response\PaymentErrorResponse;
 use BridgePayment\Response\PaymentResponse;
 use DateTime;

@@ -3,8 +3,9 @@
 namespace BridgePayment\Exception;
 
 use BridgePayment\Response\PaymentLinkErrorResponse;
+use Exception;
 
-class BridgePaymentLinkException extends \Exception
+class BridgePaymentLinkException extends Exception
 {
     /** @var PaymentLinkErrorResponse */
     protected $paymentLinkErrorResponse;

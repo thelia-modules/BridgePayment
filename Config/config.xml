@@ -35,10 +35,6 @@
             <argument type="service" id="event_dispatcher"/>
         </service>
 
-        <service id="bridgepayment.refund.service" class="BridgePayment\Service\RefundService">
-            <argument type="service" id="bridgepayment.api.service"/>
-        </service>
-
         <!-- LISTENERS -->
         <service id="bridgepayment.bridge.bank.event.listener" class="BridgePayment\EventListeners\BridgeBankEventListener">
             <argument type="service" id="bridgepayment.bank.service"/>
@@ -54,6 +50,7 @@
         </hook>
         <hook id="bridgepayment.hook.front" class="BridgePayment\Hook\FrontHook">
             <tag name="hook.event_listener" event="main.body-bottom" type="front" method="injectCSS" />
+            <tag name="hook.event_listener" event="order-invoice.after-javascript-include" type="front" method="injectBanks" />
         </hook>
     </hooks>
 

@@ -58,11 +58,6 @@ class BridgePaymentInitiation
             'json'
         );
 
-        (new BridgePaymentTransaction())
-            ->setOrderId($order->getId())
-            ->setPaymentRequestId($paymentResponse->id)
-            ->save();
-
         return $paymentResponse->consentUrl;
     }
 }

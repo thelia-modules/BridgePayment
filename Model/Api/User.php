@@ -14,8 +14,6 @@ class User
     protected $externalReference;
     /** @var string */
     protected $email;
-    /** @var string */
-    protected $iban;
 
     public function getFirstName(): ?string
     {
@@ -62,14 +60,4 @@ class User
         $this->email = $email;
         return $this;
     }
-    public function getIban() : ?string
-    {
-       return $this->iban;
-    }
-    public function setIban(string $iban): User
-    {
-       $this->iban = $iban;
-        return $this;
-    }
-
 }

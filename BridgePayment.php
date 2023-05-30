@@ -10,6 +10,7 @@ use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Thelia\Core\Translation\Translator;
 use Thelia\Install\Database;
 use Thelia\Log\Tlog;
 use Thelia\Model\Order;
@@ -140,6 +141,7 @@ class BridgePayment extends AbstractPaymentModule
 
         } catch (BridgePaymentLinkException $bridgePaymentLinkexception) {
             $errorMessage = $bridgePaymentLinkexception->getFormatedErrorMessage();
+            Tlog::getInstance()->error($errorMessage);
         } catch (Exception|GuzzleException $ex) {
             $errorMessage = $ex->getMessage();
             Tlog::getInstance()->error($errorMessage);
@@ -149,7 +151,7 @@ class BridgePayment extends AbstractPaymentModule
             URL::getInstance()->absoluteUrl(
                 sprintf("/order/failed/%d/%s", $order->getId(), 'Error'),
                 [
-                    'error_message' => $errorMessage
+                    'error_message' => Translator::getInstance()->trans("Payment process error !", [], BridgePayment::DOMAIN_NAME)
                 ]
             )
         );

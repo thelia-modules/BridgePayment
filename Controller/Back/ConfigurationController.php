@@ -1,17 +1,14 @@
 <?php
-
 namespace BridgePayment\Controller\Back;
 
 use BridgePayment\BridgePayment;
 use Exception;
-use GuzzleHttp\Psr7\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
-use Thelia\Tools\URL;
 
 /**
  * route: "/admin/module/bridgepayment"
@@ -43,19 +40,13 @@ class ConfigurationController extends BaseAdminController
         $configurationForm = $this->createForm("bridgepayment_form_bridge_payment_configuration");
 
         try {
-            $form = $this->validateForm($configurationForm, "POST");
+            $form = $this->validateForm($configurationForm);
 
-            $data = $form->getData();
-
-            foreach ($data as $name => $value) {
-                if (is_array($value)) {
-                    $value = implode(';', $value);
-                }
-
-                BridgePayment::setConfigValue($name, $value);
+            foreach ($form->getData() as $name => $value) {
+                BridgePayment::setConfigValue($name, (!is_array($value)) ? $value : implode(';', $value));
             }
 
-            return $this->generateRedirect(URL::getInstance()->absoluteUrl('/admin/module/BridgePayment'));
+            return $this->generateSuccessRedirect($configurationForm);
 
         } catch (FormValidationException $ex) {
             $error_msg = $this->createStandardFormValidationErrorMessage($ex);
@@ -70,6 +61,6 @@ class ConfigurationController extends BaseAdminController
             $ex
         );
 
-        return $this->render('module-configure', ['module_code' => 'BridgePayment']);
+        return $this->generateErrorRedirect($configurationForm);
     }
 }

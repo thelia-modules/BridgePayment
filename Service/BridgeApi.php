@@ -19,9 +19,6 @@ class BridgeApi
         string $data
     ): ResponseInterface
     {
-       // TODO: supprimer ces commentaires
-       // BridgePayment::setConfigValue('client_id', "9013e9c76c8e4a588bec1deb9eea7cea");
-       // BridgePayment::setConfigValue('client_secret', '43bZ6G15dPIEbiRKO1ISlzZfzfpofd8a4lFcUMd1UuLuzbKj0kKdOfeEK6jC4jNh');
         $httpClient = new Client();
         $clientId = BridgePayment::getConfigValue('client_id');
         $clientSecret = BridgePayment::getConfigValue('client_secret');
