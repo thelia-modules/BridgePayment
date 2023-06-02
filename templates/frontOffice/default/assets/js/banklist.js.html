@@ -30,6 +30,7 @@
         const card = document.createElement('div');
         card.classList.add('col-lg-3');
         card.classList.add('flex-col');
+        card.classList.add('bank');
         card.dataset.bank = bank.id;
 
         const figure = document.createElement('figure');
@@ -48,6 +49,7 @@
             e.preventDefault();
             processBankClick(card.dataset.bank);
             bridgeBankListContent.style.display = 'none';
+            contentBanksElt.style.display = 'none';
         });
     }
 
@@ -62,6 +64,7 @@
 
             bridgeBankList.style.display = 'block';
             bridgeBankListContent.style.display = 'block';
+            contentBanksElt.style.display = 'block';
 
             e.target.after(bridgeBankList);
         }

@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'To proceed with the payment, it is necessary to select your bank.' => 'Afin de procéder au paiement, vous devez séléctionner votre banque',
+    'To proceed with the payment, it is necessary to select your bank.' => 'Afin de procéder au paiement, vous devez sélectionner votre banque',
     'Cart' => 'Panier',
     'Go home' => 'Accueil',
     'Order canceled.' => 'Paiement annulé.',

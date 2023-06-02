@@ -60,10 +60,6 @@ class PaymentRequest implements JsonSerializable
             ->setLastName($invoiceAddress->getLastname())
             ->setExternalReference($customer->getRef());
 
-        if($invoiceAddress->getCompany()) {
-            $user->setCompanyName($invoiceAddress->getCompany());
-        }
-
         return $user;
     }
 

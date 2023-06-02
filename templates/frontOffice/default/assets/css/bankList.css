@@ -12,3 +12,9 @@
     width: 100%;
     padding: 0.5em;
 }
+
+.bank {
+    flex-basis: 50%;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
