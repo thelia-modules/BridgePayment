@@ -21,7 +21,8 @@ class Configuration
             ||
             !BridgePayment::getConfigValue(($runMode !== 'TEST' ? "prod_" : "") . "hook_secret")
         ) {
-            throw new LogicException(Translator::getInstance()->trans("Configuration missing.", [], BridgePayment::DOMAIN_NAME));
+            $mode = ($runMode !== 'TEST' ? "Production" : "Sandbox");
+            throw new LogicException(Translator::getInstance()->trans(sprintf("Your %s Configuration is not complete.", $mode), [], BridgePayment::DOMAIN_NAME));
         }
     }
 }

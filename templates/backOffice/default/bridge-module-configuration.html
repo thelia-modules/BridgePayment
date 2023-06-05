@@ -45,8 +45,11 @@
 
                 <div class="panel-body">
                     <div class="row">
-                        <div class="block col-md-12" style="background-color: #00afd7;">
+                        <div class="block col-md-9" style="background-color: #00afd7;">
                             <img style="height: 34px;" src="{image file='BridgePayment/assets/bridge-logo.png' source="BridgePayment"}" class="img-responsive"/>
+                        </div>
+                        <div class="block col-md-3" style="background-color: #00afd7;">
+                            <a id="checkConfig" class="btn btn-info pull-right"><span class="glyphicon glyphicon-check"></span>{intl l="Check your configuration" d=$_d}</a>
                         </div>
                         {if $form_error}
                         <div class="row">
@@ -148,12 +151,50 @@
             </form>
         </div>
     </div>
+    <div class="modal fade" id="modalConfig" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>{intl l="Bridge checking configuration" d=$_d}</h3>
+                </div>
+                <div class="modal-body" id="modalConfigContent">
+                    <div id="configOk" class="alert alert-success">{intl l="You configurration is complete !" d=$_d}</div>
+                    <div id="configKo" class="alert alert-warning">
+                        {intl l="You configurration is not complete !" d=$_d}
+                        <br/>
+                        {intl l="Check the execution mode and if your credentials are complete." d=$_d}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {/block}
 
 {block name="javascript-last-call"}
 
-    <scrip>
+    <script type="application/javascript">
+        const btnCheckConfig = document.getElementById("checkConfig");
 
-    </scrip>
+        btnCheckConfig.addEventListener('click', function(event){
+            event.preventDefault();
+            $.ajax({
+                url: `{url path="/admin/module/BridgePayment/check"}`,
+                error: function() {
+                    $("#modalConfig").modal("show");
+                    $("#configOk").hide();
+                    $("#configKo").show();
+                },
+                success: function(data) {
+                    $("#modalConfig").modal("show");
+                    $("#configKo").hide();
+                    $("#configOk").show();
+                }
+            });
+        })
+
+    </script>
 
 {/block}
