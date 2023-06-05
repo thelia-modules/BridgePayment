@@ -49,7 +49,10 @@
                             <img style="height: 34px;" src="{image file='BridgePayment/assets/bridge-logo.png' source="BridgePayment"}" class="img-responsive"/>
                         </div>
                         <div class="block col-md-3" style="background-color: #00afd7;">
-                            <a id="checkConfig" class="btn btn-info pull-right"><span class="glyphicon glyphicon-check"></span>{intl l="Check your configuration" d=$_d}</a>
+                            <a id="checkConfig" class="btn btn-info pull-right">
+                                <span class="glyphicon glyphicon-check"></span>
+                                <span style="margin-left: 0.5em;">{intl l="Check your configuration" d=$_d}</span>
+                            </a>
                         </div>
                         {if $form_error}
                         <div class="row">
@@ -160,9 +163,9 @@
                     <h3>{intl l="Bridge checking configuration" d=$_d}</h3>
                 </div>
                 <div class="modal-body" id="modalConfigContent">
-                    <div id="configOk" class="alert alert-success">{intl l="You configurration is complete !" d=$_d}</div>
+                    <div id="configOk" class="alert alert-success">{intl l="Your configuration is complete !" d=$_d}</div>
                     <div id="configKo" class="alert alert-warning">
-                        {intl l="You configurration is not complete !" d=$_d}
+                        {intl l="Your configuration is not complete !" d=$_d}
                         <br/>
                         {intl l="Check the execution mode and if your credentials are complete." d=$_d}
                     </div>

@@ -69,4 +69,6 @@ return array(
     'Payment request closed.' => 'Requête de paiement en clôturée. ',
     'Payment request error.' => 'Requête de paiement en échec.',
     'Store bank' => 'Banque du store',
+    'Your Production Configuration is not complete.' => 'Votre configuration Production est incomplète.',
+    'Your Sandbox Configuration is not complete.' => 'Votre configuration Sandbox est incomplète.'
 );
