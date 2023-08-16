@@ -122,9 +122,9 @@ class BridgePaymentConfiguration extends BaseForm
                     'required' => true,
                     'choices' => [
                         Translator::getInstance()->trans('Use Bridge payment link', [], BridgePayment::DOMAIN_NAME) => 'LINK',
-                        Translator::getInstance()->trans('Use Bridge payment creation', [], BridgePayment::DOMAIN_NAME) => 'CREATE',
+                        Translator::getInstance()->trans('Integrated Bridge payment page', [], BridgePayment::DOMAIN_NAME) => 'CREATE',
                     ],
-                    'label' => Translator::getInstance()->trans('Use payment link method.', [], BridgePayment::DOMAIN_NAME),
+                    'label' => Translator::getInstance()->trans('Bridge payment page type.', [], BridgePayment::DOMAIN_NAME),
                     'label_attr' => [
                         'for' => 'payment_mode',
                         'help' => Translator::getInstance()->trans('In Bridge payment creation mode, the bank selection will be displayed on the invoice page instead of order pay redirection.',

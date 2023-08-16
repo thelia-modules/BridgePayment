@@ -4,16 +4,16 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_2.xsd">
     <fullnamespace>BridgePayment\BridgePayment</fullnamespace>
     <descriptive locale="en_US">
-        <title>BridgeApi payment</title>
+        <title>Bridge Bank Payment</title>
     </descriptive>
     <descriptive locale="fr_FR">
-        <title>Paiement par BridgeApi</title>
+        <title>Paiement Bancaire Bridge</title>
     </descriptive>
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
     </languages>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <authors>
         <author>
             <name>Nicolas Barbey</name>
