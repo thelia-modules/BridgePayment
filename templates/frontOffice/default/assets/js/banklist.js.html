@@ -4,7 +4,7 @@
 <script type="application/javascript">
     {$bankList = []}
 
-    {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+    {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId|default:null}
         {$bankList[$BANK_NAME]['id'] = $BANK_ID}
         {$bankList[$BANK_NAME]['name'] = $BANK_NAME}
         {$bankList[$BANK_NAME]['logo'] = $BANK_LOGO}

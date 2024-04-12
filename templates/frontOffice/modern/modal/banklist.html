@@ -29,7 +29,7 @@
             </form>
 
             <datalist id="bank-list-datalist">
-                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId}
+                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId|default:null}
                     <option value="{$BANK_NAME}">
                 {/loop}
             </datalist>

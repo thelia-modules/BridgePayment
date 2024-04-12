@@ -23,9 +23,9 @@ class BankService
      */
     public function getBanks(string $countryCode)
     {
-        $cacheDriver = new FilesystemCache(THELIA_CACHE_DIR . 'bridge');
+        //$cacheDriver = new FilesystemCache(THELIA_CACHE_DIR . 'bridge');
 
-        if (null !== $bankList = $cacheDriver->fetch('banks')) {
+        if (true) {
             $response = $this->apiService->apiCall(
                 'GET',
                 BridgePayment::BRIDGE_API_URL . '/v2/banks?countries=' . $countryCode . '&capabilities=single_payment&limit=500',
@@ -48,7 +48,7 @@ class BankService
 
             $bankList = serialize($banksResponse['resources']);
 
-            $cacheDriver->save('banks', $bankList, 86400);
+            //$cacheDriver->save('banks', $bankList, 86400);
         }
 
         return unserialize($bankList);

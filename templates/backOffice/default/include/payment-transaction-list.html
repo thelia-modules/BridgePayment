@@ -8,7 +8,7 @@
             <th>{intl l='Status reason' d=$_d}</th>
             <th>{intl l='Action' d=$_d}</th>
         </tr>
-        {loop type="payment_transaction_list" name="payment_transaction_list" order_id=$order_id payment_link_id=$PAYMENT_LINK_UUID}
+        {loop type="payment_transaction_list" name="payment_transaction_list" order_id=$order_id payment_link_id=$PAYMENT_LINK_UUID|default:null}
             <tr>
                 <td>{$PAYMENT_TRANSACTION_UUID}</td>
                 <td>

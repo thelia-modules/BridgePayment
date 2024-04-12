@@ -36,10 +36,10 @@
                                     {$PAYMENT_LINK_ID}
                                 </td>
                                 <td>
-                                    {$PAYMENT_LINK_UUID}
+                                    {$PAYMENT_LINK_UUID|default:null}
                                 </td>
                                 <td>
-                                    <a class="btn btn-link" href="{$PAYMENT_LINK_LINK}">{$PAYMENT_LINK_LINK}</a>
+                                    <a class="btn btn-link" href="{$PAYMENT_LINK_LINK|default:null}">{$PAYMENT_LINK_LINK|default:null}</a>
                                 </td>
                                 <td>
                                     {format_money number=$TOTAL_TAXED_AMOUNT currency_id=$CURRENCY}
@@ -67,7 +67,7 @@
                                         </a>
                                     {/if}
                                 </td>
-                                {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID}
+                                {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID|default:null}
                             {/loop}
                             </tbody>
                         </table>
@@ -79,7 +79,7 @@
                             {intl l='BridgePayment payment transaction history' d=$_d}
                         </div>
                         <div class="col-md-12">
-                            {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID}
+                            {include file="include/payment-transaction-list.html" order_id=$order_id PAYMENT_LINK_UUID=$PAYMENT_LINK_UUID|default:null}
                         </div>
                     {/ifloop}
                     {elseloop rel="payment_transaction_list"}

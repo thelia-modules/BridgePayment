@@ -156,12 +156,11 @@ class PaymentTransaction
             ->findOne();
 
         if (null !== $orderStatus) {
+            if ($orderStatus->getId() === 2) {
+                $order->setTransactionRef($transactionRef)->save();
+            }
             $event = (new OrderEvent($order))->setStatus($orderStatus->getId());
             $this->dispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
-
-            if ($event->getOrder()->isPaid()) {
-                $event->getOrder()->setTransactionRef($transactionRef)->save();
-            }
         }
     }
 }
