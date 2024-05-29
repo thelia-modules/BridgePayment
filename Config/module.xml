@@ -13,7 +13,7 @@
         <language>en_US</language>
         <language>fr_FR</language>
     </languages>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
     <authors>
         <author>
             <name>Nicolas Barbey</name>
@@ -27,9 +27,13 @@
             <name>Bertrand TOURLONIAS</name>
             <email>btourlonias@openstudio.fr</email>
         </author>
+        <author>
+            <name>Pierre BAGUET</name>
+            <email>pbaguet@openstudio.fr</email>
+        </author>
     </authors>
     <type>payment</type>
-    <thelia>2.4.0</thelia>
+    <thelia>2.5.0</thelia>
     <stability>other</stability>
     <mandatory>0</mandatory>
     <hidden>0</hidden>

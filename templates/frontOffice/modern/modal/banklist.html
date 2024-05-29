@@ -1,6 +1,7 @@
 {strip}
 <div id="bridge-bank-list">
     <div class="mr-6 block text-base text-main">{intl l="Bridge payment"}</div>
+    <div class="block text-base my-4">{intl l="Pay by bank transfer using Bridge. Regularize your order by validating the transfer directly from your bank: simple, 100% secure and without a bank card."}</div>
     <div id="bridge-bank-list-content">
         <div>
             <h4>{intl l="To proceed with the payment, it is necessary to select your bank." d="bridgepayment.fo.modern"}</h4>
@@ -18,22 +19,17 @@
 
             <form class="PhoneCheck mt-0">
                 <div class="PhoneCheck-field">
-                    <div class="PhoneInput">
-                        <input list="bank-list-datalist"
+                    <div class="PhoneInput mt-3">
+                        <input
+                               type="search"
                                style="width: 100%; padding: 0.5em;"
                                class="PhoneInput"
                                id="bank-list"
+                               placeholder="{intl l="Search a bank"}"
                                name="bank-list">
                     </div>
                 </div>
             </form>
-
-            <datalist id="bank-list-datalist">
-                {loop type="bank_list" name="bank_list" limit=100 order_id=$orderId|default:null}
-                    <option value="{$BANK_NAME}">
-                {/loop}
-            </datalist>
-
         </div>
     </div>
 

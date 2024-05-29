@@ -28,12 +28,16 @@
 
     function createBankCard(bank) {
         const card = document.createElement('div');
-        card.classList.add('col-lg-3');
-        card.classList.add('flex-col');
+        card.classList.add('flex');
+        card.classList.add('items-center');
         card.classList.add('bank');
         card.dataset.bank = bank.id;
 
         const figure = document.createElement('figure');
+        figure.classList.add('w-auto');
+        figure.classList.add('py-4');
+        figure.classList.add('mr-3');
+        figure.classList.add('bank-img');
         const img = document.createElement('img');
         img.src = bank.logo;
         const name = document.createElement('div');
@@ -48,8 +52,10 @@
         card.addEventListener('click', function (e) {
             e.preventDefault();
             processBankClick(card.dataset.bank);
-            bridgeBankListContent.style.display = 'none';
-            contentBanksElt.style.display = 'none';
+            document.querySelectorAll('.bank').forEach(el => {
+               el.classList.remove('active');
+            });
+            e.currentTarget.classList.add('active');
         });
     }
 
@@ -70,12 +76,25 @@
         }
     });
 
+    function getAllBanksCard(list)
+    {
+
+        contentBanksElt.innerHTML = "";
+
+        for (let val of Object.values(list)) {
+            createBankCard(val);
+        }
+    }
+
+    getAllBanksCard(listBank);
+
+
     inputElt.addEventListener('input', (event) => {
         const inputValue = format(event.target.value);
         let inputValues = inputValue.split(' ');
 
         if (!inputValue || inputValue.length < 2) {
-            contentBanksElt.innerHTML = "";
+            getAllBanksCard(listBank);
             return;
         }
 

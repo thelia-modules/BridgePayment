@@ -21,5 +21,7 @@ return array(
     'Select your bank.' => 'Sélectionnez votre banque',
     "Enter your bank's name and select the good one." => 'Entrez le nom de votre banque puis sélectionnez-la.',
     'Min 2 characters' => '2 lettres minimum',
+    'Search a bank' => 'Rechercher une banque',
+    'Pay by bank transfer using Bridge. Regularize your order by validating the transfer directly from your bank: simple, 100% secure and without a bank card.' => 'Payer par virement bancaire grâce Bridge. Régulariser votre commande en validant le virement directement depuis votre banque : simple, 100% sécurisé et sans carte bancaire.',
     'Cancel' => 'Annuler'
 );

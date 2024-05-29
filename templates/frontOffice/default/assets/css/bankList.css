@@ -1,14 +1,13 @@
 #contentBanks {
-    display:flex;
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     max-height: 350px;
-    border: 1px solid #eee;
-    padding-left: 1em;
+    border: 2px solid #eee;
+    margin-top: 2em;
 }
 
 #bank-list {
-    width: 100%;
     width: 100%;
     padding: 0.5em;
 }
@@ -17,4 +16,21 @@
     flex-basis: 50%;
     flex-grow: 0;
     flex-shrink: 0;
+    border-bottom: 1px solid #CCC;
+    transition: all 0.2s ease-in;
+    padding-left: 2em;
+}
+
+.bank-img img {
+    max-width: 100px;
+    margin: 0 auto;
+}
+
+.bank:last-child {
+    border-bottom: 0;
+}
+
+.bank.active {
+    background-color: #fb923c;
+    color: white;
 }
