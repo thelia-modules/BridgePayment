@@ -8,7 +8,7 @@ use BridgePayment\Model\Notification\NotificationContent;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
 use Exception;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
