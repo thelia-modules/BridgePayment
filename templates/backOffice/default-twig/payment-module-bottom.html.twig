@@ -1,0 +1,70 @@
+{% set _d = 'bridgepayment' %}
+<div class="panel panel-default" style="margin-top: 10px;">
+    <div class="panel-heading">
+        <h4 style="text-align: center;">{{ 'BridgePayment payment informations'|trans({}, _d) }}</h4>
+    </div>
+    <div class="panel panel-body">
+        <div class="row">
+            {% if payment_links is defined and payment_links|length > 0 %}
+                <div class="col-md-12 title title-without-tabs">
+                    {{ 'BridgePayment payment link history'|trans({}, _d) }}
+                </div>
+                <div class="col-md-12">
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                        <tr>
+                            <th>{{ 'ID'|trans({}, _d) }}</th>
+                            <th>{{ 'Link ID'|trans({}, _d) }}</th>
+                            <th>{{ 'Link'|trans({}, _d) }}</th>
+                            <th>{{ 'Amount'|trans({}, _d) }}</th>
+                            <th>{{ 'Expire at'|trans({}, _d) }}</th>
+                            <th>{{ 'Updated at'|trans({}, _d) }}</th>
+                            <th>{{ 'Status'|trans({}, _d) }}</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for link in payment_links %}
+                            <td>{{ link.id }}</td>
+                            <td>{{ link.uuid }}</td>
+                            <td>
+                                <a class="btn btn-link" href="{{ link.link }}">{{ link.link }}</a>
+                            </td>
+                            <td>{{ link.amount|number_format(2, '.', ' ') }}</td>
+                            <td>{{ link.expiredAt }}</td>
+                            <td>{{ link.updatedAt }}</td>
+                            <td>
+                                <span class="label" style="background-color: {{ link.statusColor }};">{{ link.status }}</span>
+                            </td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ path('bridgepayment_paymentlink_refresh', {paymentLinkUuid: link.uuid}) }}">
+                                    <i class="glyphicon glyphicon-refresh"></i>
+                                </a>
+
+                                {% if link.status != 'EXPIRED' and link.status != 'COMPLETED' %}
+                                    <a class="btn btn-danger" href="{{ path('bridgepayment_paymentlink_revoke', {paymentLinkUuid: link.uuid}) }}">
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                            {% set link_transactions = link_transactions_map[link.uuid] ?? [] %}
+                            {% include 'include/payment-transaction-list.html.twig' with {transactions: link_transactions} %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                {% if transactions is defined and transactions|length > 0 %}
+                    <div class="col-md-12 title title-without-tabs">
+                        {{ 'BridgePayment payment transaction history'|trans({}, _d) }}
+                    </div>
+                    <div class="col-md-12">
+                        {% include 'include/payment-transaction-list.html.twig' with {transactions: transactions} %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">{{ 'No payment information'|trans({}, _d) }}</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>

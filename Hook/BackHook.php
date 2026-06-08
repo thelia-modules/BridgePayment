@@ -3,21 +3,130 @@
 namespace BridgePayment\Hook;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Model\BridgePaymentLink;
+use BridgePayment\Model\BridgePaymentLinkQuery;
+use BridgePayment\Model\BridgePaymentTransaction;
+use BridgePayment\Model\BridgePaymentTransactionQuery;
+use BridgePayment\Service\PaymentLink;
+use BridgePayment\Service\PaymentTransaction;
 use Thelia\Core\Event\Hook\HookRenderEvent;
+use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Core\Translation\Translator;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class BackHook extends BaseHook
 {
+    private TheliaFormFactory $formFactory;
+
+    #[Required]
+    public function setFormFactory(TheliaFormFactory $formFactory): void
+    {
+        $this->formFactory = $formFactory;
+    }
+
     public function onModuleConfiguration(HookRenderEvent $event): void
     {
-        $event->add($this->render("bridge-module-configuration.html"));
+        $form = $this->formFactory->createForm('bridgepayment_form_bridge_payment_configuration');
+        $form->createView();
+
+        $event->add($this->render('bridge-module-configuration.html.twig', [
+            'form' => $form->getView(),
+        ]));
     }
 
     public function onPaymentModuleBottom(HookRenderEvent $event): void
     {
         $arguments = $event->getArguments();
-        if (BridgePayment::getModuleId() === $arguments['module_id'] ?? null) {
-            $event->add($this->render("payment-module-bottom.html"));
+        if (BridgePayment::getModuleId() !== ($arguments['module_id'] ?? null)) {
+            return;
         }
+
+        $orderId = (int) ($arguments['order_id'] ?? 0);
+
+        $paymentLinks = BridgePaymentLinkQuery::create()
+            ->useOrderQuery()
+            ->filterById($orderId)
+            ->endUse()
+            ->find();
+
+        $paymentLinksData = [];
+        $linkTransactionsMap = [];
+
+        /** @var BridgePaymentLink $paymentLink */
+        foreach ($paymentLinks as $paymentLink) {
+            $rawStatus = $paymentLink->getStatus();
+            $statusColor = PaymentLink::PAYMENT_LINK_STATUS[$rawStatus]['color'] ?? '#888888';
+            $status = Translator::getInstance()->trans($rawStatus ?? '', [], BridgePayment::DOMAIN_NAME);
+
+            $paymentLinksData[] = [
+                'id'         => $paymentLink->getId(),
+                'uuid'       => $paymentLink->getUuid(),
+                'link'       => (!in_array($rawStatus, ['COMPLETED', 'EXPIRED'], true)) ? $paymentLink->getLink() : null,
+                'amount'     => $paymentLink->getAmount(),
+                'expiredAt'  => $paymentLink->getExpiredAt()?->format('d/m/Y H:i:s'),
+                'updatedAt'  => $paymentLink->getUpdatedAt()?->format('d/m/Y H:i:s'),
+                'status'     => $status,
+                'statusColor' => $statusColor,
+                'rawStatus'  => $rawStatus,
+            ];
+
+            $linkTransactions = BridgePaymentTransactionQuery::create()
+                ->filterByPaymentLinkId($paymentLink->getUuid())
+                ->find();
+
+            $linkTransactionsMap[$paymentLink->getUuid()] = $this->buildTransactionData($linkTransactions);
+        }
+
+        // If no payment links, fetch standalone transactions
+        $transactionsData = [];
+        if (empty($paymentLinksData)) {
+            $transactions = BridgePaymentTransactionQuery::create()
+                ->useOrderQuery()
+                ->filterById($orderId)
+                ->endUse()
+                ->find();
+
+            $transactionsData = $this->buildTransactionData($transactions);
+        }
+
+        $event->add($this->render('payment-module-bottom.html.twig', [
+            'payment_links'        => $paymentLinksData,
+            'link_transactions_map' => $linkTransactionsMap,
+            'transactions'         => $transactionsData,
+        ]));
+    }
+
+    /**
+     * @param iterable<BridgePaymentTransaction> $transactions
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildTransactionData(iterable $transactions): array
+    {
+        $data = [];
+
+        foreach ($transactions as $transaction) {
+            $rawStatus = $transaction->getStatus();
+            $statusColor = PaymentTransaction::PAYMENT_TRANSACTION_STATUS[$rawStatus] ?? '#888888';
+            $status = Translator::getInstance()->trans($rawStatus ?? '', [], BridgePayment::DOMAIN_NAME);
+
+            $rawStatusReason = $transaction->getStatusReason();
+            $statusReason = $rawStatusReason
+                ? Translator::getInstance()->trans($rawStatusReason, [], BridgePayment::DOMAIN_NAME)
+                : '';
+
+            $data[] = [
+                'uuid'             => $transaction->getUuid(),
+                'amount'           => $transaction->getAmount(),
+                'orderTotal'       => null,
+                'createdAt'        => $transaction->getCreatedAt()?->format('d/m/Y H:i:s'),
+                'status'           => $status,
+                'statusColor'      => $statusColor,
+                'statusReason'     => $statusReason,
+                'paymentRequestId' => $transaction->getPaymentRequestId(),
+            ];
+        }
+
+        return $data;
     }
 }

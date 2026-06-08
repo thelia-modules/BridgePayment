@@ -1,0 +1,32 @@
+{% if transactions is defined and transactions|length > 0 %}
+    <table class="table table-condensed table-striped table-bordered">
+        <tr>
+            <th>{{ 'Transaction ID'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Amount'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Created at'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Status'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Status reason'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Action'|trans({}, 'bridgepayment') }}</th>
+        </tr>
+        {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.uuid }}</td>
+                <td>
+                    {% if transaction.amount %}
+                        {{ transaction.amount|number_format(2, '.', ' ') }}
+                    {% else %}
+                        {{ transaction.orderTotal|number_format(2, '.', ' ') }}
+                    {% endif %}
+                </td>
+                <td>{{ transaction.createdAt }}</td>
+                <td>
+                    <span class="label" style="background-color: {{ transaction.statusColor }};">{{ transaction.status }}</span>
+                </td>
+                <td>{{ transaction.statusReason }}</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="{{ path('bridgepayment_payment_refresh', {paymentRequestId: transaction.paymentRequestId}) }}">{{ 'Refresh'|trans({}, 'bridgepayment') }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}

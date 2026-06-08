@@ -1,0 +1,211 @@
+<style>
+.bridgepayment-block {
+    padding: 20px;
+    border-bottom: 0.5px solid #00afd7;
+}
+.bridgepayment-block h2 {
+    color: #00afd7;
+}
+.bridgepayment-block .bridgepayment-block {
+    border: 2px solid rgba(0, 211, 152, 0.61);
+}
+</style>
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        {{ form_start(form, {action: path('bridgepayment_configure_save'), method: 'post'}) }}
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="bridgepayment-block col-md-9" style="background-color: #00afd7;">
+                        <img style="height: 34px;" src="{{ asset('modules/BridgePayment/assets/bridge-logo.png') }}" class="img-responsive" alt="Bridge"/>
+                    </div>
+                    <div class="bridgepayment-block col-md-3" style="background-color: #00afd7;">
+                        <a id="checkConfig" class="btn btn-info pull-right" href="#">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <span style="margin-left: 0.5em;">{{ 'Check your configuration'|trans({}, 'bridgepayment') }}</span>
+                        </a>
+                    </div>
+
+                    {% if form_error_message is defined and form_error_message %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-danger">{{ form_error_message }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'BridgePayment mode'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                {{ form_label(form.payment_mode) }}
+                                {{ form_widget(form.payment_mode, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.payment_mode) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'Mode'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.run_mode) }}
+                                {{ form_widget(form.run_mode, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.run_mode) }}
+                                <span class="help-block">{{ 'Sandbox or production mode.'|trans({}, 'bridgepayment') }}</span>
+                            </div>
+                        </div>
+                        <div id="ip_list" class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.allowed_ip_list) }}
+                                {{ form_widget(form.allowed_ip_list, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.allowed_ip_list) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'SANDBOX - API configuration'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.client_id) }}
+                                {{ form_widget(form.client_id, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.client_id) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.client_secret) }}
+                                {{ form_widget(form.client_secret, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.client_secret) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.hook_secret) }}
+                                {{ form_widget(form.hook_secret, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.hook_secret) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'PRODUCTION - API configuration'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.prod_client_id) }}
+                                {{ form_widget(form.prod_client_id, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.prod_client_id) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.prod_client_secret) }}
+                                {{ form_widget(form.prod_client_secret, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.prod_client_secret) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.prod_hook_secret) }}
+                                {{ form_widget(form.prod_hook_secret, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.prod_hook_secret) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'Webhook configuration'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="url_callback">{{ 'Notification callback URL'|trans({}, 'bridgepayment') }}</label>
+                                <input id="url_callback" type="text" class="form-control" readonly value="{{ path('bridgepayment_notification') }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bridgepayment-block col-md-12">
+                        <div class="col-md-12">
+                            <h2>{{ 'Payment configurations'|trans({}, 'bridgepayment') }}</h2>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.minimum_amount) }}
+                                {{ form_widget(form.minimum_amount, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.minimum_amount) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form_label(form.maximum_amount) }}
+                                {{ form_widget(form.maximum_amount, {attr: {class: 'form-control'}}) }}
+                                {{ form_errors(form.maximum_amount) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success form-control">{{ 'Save'|trans({}, 'bridgepayment') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="modal fade" id="modalConfig" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>{{ 'Bridge checking configuration'|trans({}, 'bridgepayment') }}</h3>
+            </div>
+            <div class="modal-body" id="modalConfigContent">
+                <div id="configOk" class="alert alert-success">{{ 'Your configuration is complete !'|trans({}, 'bridgepayment') }}</div>
+                <div id="configKo" class="alert alert-warning">
+                    {{ 'Your configuration is not complete !'|trans({}, 'bridgepayment') }}
+                    <br/>
+                    {{ 'Check the execution mode and if your credentials are complete.'|trans({}, 'bridgepayment') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+    (function() {
+        const btnCheckConfig = document.getElementById("checkConfig");
+        if (btnCheckConfig) {
+            btnCheckConfig.addEventListener('click', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '{{ path('bridgepayment_configure_check') }}',
+                    error: function() {
+                        $("#modalConfig").modal("show");
+                        $("#configOk").hide();
+                        $("#configKo").show();
+                    },
+                    success: function(data) {
+                        $("#modalConfig").modal("show");
+                        $("#configKo").hide();
+                        $("#configOk").show();
+                    }
+                });
+            });
+        }
+    })();
+</script>
