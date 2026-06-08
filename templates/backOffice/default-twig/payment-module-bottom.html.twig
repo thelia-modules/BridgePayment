@@ -1,4 +1,4 @@
-{% set _d = 'bridgepayment' %}
+{% set _d = 'bridgepayment.bo.default' %}
 <div class="panel panel-default" style="margin-top: 10px;">
     <div class="panel-heading">
         <h4 style="text-align: center;">{{ 'BridgePayment payment informations'|trans({}, _d) }}</h4>
@@ -41,7 +41,7 @@
                                     <i class="glyphicon glyphicon-refresh"></i>
                                 </a>
 
-                                {% if link.status != 'EXPIRED' and link.status != 'COMPLETED' %}
+                                {% if link.rawStatus != 'EXPIRED' and link.rawStatus != 'COMPLETED' %}
                                     <a class="btn btn-danger" href="{{ path('bridgepayment_paymentlink_revoke', {paymentLinkUuid: link.uuid}) }}">
                                         <i class="glyphicon glyphicon-remove"></i>
                                     </a>

@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurat
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Thelia\Core\Translation\Translator;
-use Thelia\Install\Database;
+use Thelia\Core\Install\Database;
 use Thelia\Log\Tlog;
 use Thelia\Model\Order;
 use Thelia\Model\OrderStatus;
@@ -198,7 +198,7 @@ class BridgePayment extends AbstractPaymentModule
     public static function configureServices(ServicesConfigurator $servicesConfigurator): void
     {
         $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
-            ->exclude([THELIA_MODULE_DIR.ucfirst(self::getModuleCode()).'/I18n/*'])
+            ->exclude([__DIR__.'/I18n/*', __DIR__.'/BridgePayment.php'])
             ->autowire(true)
             ->autoconfigure(true);
     }

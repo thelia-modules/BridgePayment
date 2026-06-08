@@ -1,3 +1,4 @@
+{% set _d = 'bridgepayment.bo.default' %}
 <style>
 .bridgepayment-block {
     padding: 20px;
@@ -23,7 +24,7 @@
                     <div class="bridgepayment-block col-md-3" style="background-color: #00afd7;">
                         <a id="checkConfig" class="btn btn-info pull-right" href="#">
                             <span class="glyphicon glyphicon-check"></span>
-                            <span style="margin-left: 0.5em;">{{ 'Check your configuration'|trans({}, 'bridgepayment') }}</span>
+                            <span style="margin-left: 0.5em;">{{ 'Check your configuration'|trans({}, _d) }}</span>
                         </a>
                     </div>
 
@@ -37,7 +38,7 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'BridgePayment mode'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'BridgePayment mode'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-12">
                             <div class="mb-3">
@@ -50,14 +51,14 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'Mode'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'Mode'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 {{ form_label(form.run_mode) }}
                                 {{ form_widget(form.run_mode, {attr: {class: 'form-control'}}) }}
                                 {{ form_errors(form.run_mode) }}
-                                <span class="help-block">{{ 'Sandbox or production mode.'|trans({}, 'bridgepayment') }}</span>
+                                <span class="help-block">{{ 'Sandbox or production mode.'|trans({}, _d) }}</span>
                             </div>
                         </div>
                         <div id="ip_list" class="col-md-6">
@@ -71,7 +72,7 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'SANDBOX - API configuration'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'SANDBOX - API configuration'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -98,7 +99,7 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'PRODUCTION - API configuration'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'PRODUCTION - API configuration'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -125,11 +126,11 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'Webhook configuration'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'Webhook configuration'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="url_callback">{{ 'Notification callback URL'|trans({}, 'bridgepayment') }}</label>
+                                <label class="form-label" for="url_callback">{{ 'Notification callback URL'|trans({}, _d) }}</label>
                                 <input id="url_callback" type="text" class="form-control" readonly value="{{ path('bridgepayment_notification') }}">
                             </div>
                         </div>
@@ -137,7 +138,7 @@
 
                     <div class="bridgepayment-block col-md-12">
                         <div class="col-md-12">
-                            <h2>{{ 'Payment configurations'|trans({}, 'bridgepayment') }}</h2>
+                            <h2>{{ 'Payment configurations'|trans({}, _d) }}</h2>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -157,7 +158,7 @@
 
                     <div class="row mt-3">
                         <div class="col-md-12">
-                            <button type="submit" class="btn btn-success form-control">{{ 'Save'|trans({}, 'bridgepayment') }}</button>
+                            <button type="submit" class="btn btn-success form-control">{{ 'Save'|trans({}, _d) }}</button>
                         </div>
                     </div>
                 </div>
@@ -172,14 +173,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3>{{ 'Bridge checking configuration'|trans({}, 'bridgepayment') }}</h3>
+                <h3>{{ 'Bridge checking configuration'|trans({}, _d) }}</h3>
             </div>
             <div class="modal-body" id="modalConfigContent">
-                <div id="configOk" class="alert alert-success">{{ 'Your configuration is complete !'|trans({}, 'bridgepayment') }}</div>
+                <div id="configOk" class="alert alert-success">{{ 'Your configuration is complete !'|trans({}, _d) }}</div>
                 <div id="configKo" class="alert alert-warning">
-                    {{ 'Your configuration is not complete !'|trans({}, 'bridgepayment') }}
+                    {{ 'Your configuration is not complete !'|trans({}, _d) }}
                     <br/>
-                    {{ 'Check the execution mode and if your credentials are complete.'|trans({}, 'bridgepayment') }}
+                    {{ 'Check the execution mode and if your credentials are complete.'|trans({}, _d) }}
                 </div>
             </div>
         </div>

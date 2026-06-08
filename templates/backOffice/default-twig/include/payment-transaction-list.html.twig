@@ -1,12 +1,13 @@
+{% set _d = 'bridgepayment.bo.default' %}
 {% if transactions is defined and transactions|length > 0 %}
     <table class="table table-condensed table-striped table-bordered">
         <tr>
-            <th>{{ 'Transaction ID'|trans({}, 'bridgepayment') }}</th>
-            <th>{{ 'Amount'|trans({}, 'bridgepayment') }}</th>
-            <th>{{ 'Created at'|trans({}, 'bridgepayment') }}</th>
-            <th>{{ 'Status'|trans({}, 'bridgepayment') }}</th>
-            <th>{{ 'Status reason'|trans({}, 'bridgepayment') }}</th>
-            <th>{{ 'Action'|trans({}, 'bridgepayment') }}</th>
+            <th>{{ 'Transaction ID'|trans({}, _d) }}</th>
+            <th>{{ 'Amount'|trans({}, _d) }}</th>
+            <th>{{ 'Created at'|trans({}, _d) }}</th>
+            <th>{{ 'Status'|trans({}, _d) }}</th>
+            <th>{{ 'Status reason'|trans({}, _d) }}</th>
+            <th>{{ 'Action'|trans({}, _d) }}</th>
         </tr>
         {% for transaction in transactions %}
             <tr>
@@ -24,7 +25,7 @@
                 </td>
                 <td>{{ transaction.statusReason }}</td>
                 <td>
-                    <a class="btn btn-sm btn-primary" href="{{ path('bridgepayment_payment_refresh', {paymentRequestId: transaction.paymentRequestId}) }}">{{ 'Refresh'|trans({}, 'bridgepayment') }}</a>
+                    <a class="btn btn-sm btn-primary" href="{{ path('bridgepayment_payment_refresh', {paymentRequestId: transaction.paymentRequestId}) }}">{{ 'Refresh'|trans({}, _d) }}</a>
                 </td>
             </tr>
         {% endfor %}
