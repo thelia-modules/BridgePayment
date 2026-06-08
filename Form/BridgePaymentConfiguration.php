@@ -15,6 +15,11 @@ use Thelia\Form\BaseForm;
 
 class BridgePaymentConfiguration extends BaseForm
 {
+    public static function getName(): string
+    {
+        return 'bridgepayment_configuration';
+    }
+
     protected function buildForm(): void
     {
         $this->formBuilder

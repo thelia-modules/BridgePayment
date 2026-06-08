@@ -10,10 +10,6 @@
         <loop name="payment_transaction_list" class="BridgePayment\Loop\PaymentTransactionLoop" />
     </loops>
 
-    <forms>
-        <form name="bridgepayment_form_bridge_payment_configuration" class="BridgePayment\Form\BridgePaymentConfiguration" />
-    </forms>
-
     <services>
         <service id="bridgepayment.bank.service" alias="BridgePayment\Service\BankService" public="true"/>
         <service id="bridgepayment.payment.link.service" alias="BridgePayment\Service\PaymentLink" public="true"/>
@@ -21,14 +17,4 @@
         <service id="bridgepayment.payment.configuration.service" alias="BridgePayment\Service\Configuration" public="true"/>
     </services>
 
-    <hooks>
-        <hook id="bridgepayment.hook.back" class="BridgePayment\Hook\BackHook">
-            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
-            <tag name="hook.event_listener" event="order-edit.payment-module-bottom" type="back" method="onPaymentModuleBottom" />
-        </hook>
-        <hook id="bridgepayment.hook.front" class="BridgePayment\Hook\FrontHook">
-            <tag name="hook.event_listener" event="main.body-bottom" type="front" method="injectCSS" />
-            <tag name="hook.event_listener" event="order-delivery.bottom" type="front" method="injectBanks" />
-        </hook>
-    </hooks>
 </config>

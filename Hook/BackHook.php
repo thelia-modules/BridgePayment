@@ -3,31 +3,45 @@
 namespace BridgePayment\Hook;
 
 use BridgePayment\BridgePayment;
+use BridgePayment\Form\BridgePaymentConfiguration;
 use BridgePayment\Model\BridgePaymentLink;
 use BridgePayment\Model\BridgePaymentLinkQuery;
 use BridgePayment\Model\BridgePaymentTransaction;
 use BridgePayment\Model\BridgePaymentTransactionQuery;
 use BridgePayment\Service\PaymentLink;
 use BridgePayment\Service\PaymentTransaction;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Core\Template\ParserResolver;
 use Thelia\Core\Translation\Translator;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class BackHook extends BaseHook
 {
-    private TheliaFormFactory $formFactory;
+    public function __construct(
+        private readonly TheliaFormFactory $formFactory,
+        ?EventDispatcherInterface $dispatcher = null,
+        ?ParserResolver $parserResolver = null,
+    ) {
+        parent::__construct($dispatcher, $parserResolver);
+    }
 
-    #[Required]
-    public function setFormFactory(TheliaFormFactory $formFactory): void
+    public static function getSubscribedHooks(): array
     {
-        $this->formFactory = $formFactory;
+        return [
+            'module.configuration' => [
+                ['type' => 'back', 'method' => 'onModuleConfiguration'],
+            ],
+            'order-edit.payment-module-bottom' => [
+                ['type' => 'back', 'method' => 'onPaymentModuleBottom'],
+            ],
+        ];
     }
 
     public function onModuleConfiguration(HookRenderEvent $event): void
     {
-        $form = $this->formFactory->createForm('bridgepayment_form_bridge_payment_configuration');
+        $form = $this->formFactory->createForm(BridgePaymentConfiguration::getName());
         $form->createView();
 
         $event->add($this->render('bridge-module-configuration.html.twig', [

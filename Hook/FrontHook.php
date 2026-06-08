@@ -8,6 +8,18 @@ use Thelia\Core\Hook\BaseHook;
 
 class FrontHook extends BaseHook
 {
+    public static function getSubscribedHooks(): array
+    {
+        return [
+            'main.body-bottom' => [
+                ['type' => 'front', 'method' => 'injectCSS'],
+            ],
+            'order-delivery.bottom' => [
+                ['type' => 'front', 'method' => 'injectBanks'],
+            ],
+        ];
+    }
+
     public function injectCSS(HookRenderEvent $event)
     {
         $event->add($this->addCSS('assets/css/bankList.css'));
