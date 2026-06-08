@@ -6,6 +6,7 @@ use BridgePayment\BridgePayment;
 use BridgePayment\Model\Base\BridgePaymentLinkQuery;
 use BridgePayment\Model\BridgePaymentLink;
 use BridgePayment\Service\PaymentLink;
+use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Exception\PropelException;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
@@ -27,7 +28,7 @@ class PaymentLinkLoop extends BaseLoop implements PropelSearchLoopInterface
         );
     }
 
-    public function buildModelCriteria()
+    public function buildModelCriteria(): ModelCriteria
     {
         return BridgePaymentLinkQuery::create()
             ->useOrderQuery()

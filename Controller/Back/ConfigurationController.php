@@ -6,26 +6,20 @@ use BridgePayment\BridgePayment;
 use BridgePayment\Form\BridgePaymentConfiguration;
 use BridgePayment\Service\Configuration;
 use Exception;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\HttpFoundation\JsonResponse;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\Exception\FormValidationException;
+use Thelia\Tools\URL;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/admin/module/BridgePayment', name: "bridgepayment_configure")]
 class ConfigurationController extends BaseAdminController
 {
-    #[Route('', name: "_view", methods: "GET")]
-    public function view(): Response
-    {
-        $runMode = BridgePayment::getConfigValue("run_mode", 'Production');
-        return $this->render('bridge-module-configuration');
-    }
-
     #[Route('/configure', name: "_save", methods: "POST")]
     public function configure(Configuration $configurationService): Response
     {
@@ -46,9 +40,7 @@ class ConfigurationController extends BaseAdminController
                 BridgePayment::setConfigValue($name, (!is_array($value)) ? $value : implode(';', $value));
             }
 
-            $configurationService->checkConfiguration();
-
-            return $this->generateSuccessRedirect($configurationForm);
+            return new RedirectResponse(URL::getInstance()->absoluteUrl('/admin/module/BridgePayment'));
 
         } catch (FormValidationException $ex) {
             $error_msg = $this->createStandardFormValidationErrorMessage($ex);
@@ -63,7 +55,7 @@ class ConfigurationController extends BaseAdminController
             $ex
         );
 
-        return $this->generateErrorRedirect($configurationForm);
+        return $this->render('module-configure', ['module_code' => 'BridgePayment']);
     }
 
     #[Route('/check', name: "_check", methods: "GET")]
