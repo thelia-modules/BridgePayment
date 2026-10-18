@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Hook\BaseHook;
-use Thelia\Core\Template\ParserResolver;
+use Thelia\Core\Template\Parser\ParserResolver;
 use Thelia\Core\Translation\Translator;
 
 class BackHook extends BaseHook
