@@ -7,14 +7,13 @@ use BridgePayment\Model\BridgePaymentLinkQuery;
 use BridgePayment\Service\PaymentLink;
 use DateTime;
 use Exception;
-use Front\Front;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Request;
-use Thelia\Core\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
@@ -53,7 +52,7 @@ class FrontController extends BaseFrontController
                     Translator::getInstance()->trans(
                         'Received failed order id',
                         [],
-                        Front::MESSAGE_DOMAIN
+                        'front'
                     ),
                     TheliaProcessException::PLACED_ORDER_ID_BAD_CURRENT_CUSTOMER,
                     $cancelOrder
@@ -67,7 +66,7 @@ class FrontController extends BaseFrontController
                     Translator::getInstance()->trans(
                         'Received failed order id does not belong to the current customer',
                         [],
-                        Front::MESSAGE_DOMAIN
+                        'front'
                     ),
                     TheliaProcessException::PLACED_ORDER_ID_BAD_CURRENT_CUSTOMER,
                     $cancelOrder
